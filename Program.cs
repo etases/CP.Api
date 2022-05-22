@@ -12,15 +12,19 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-
-if (buildEnv.IsDevelopment())
+builder.Services.AddDbContextPool<ApplicationDbContext>(options =>
 {
-    // Add development services.
-    builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    {
+    if (builder.Environment.IsDevelopment())
         options.UseNpgsql(buildConf.GetConnectionString("DefaultConnection"));
-    });
-}
+    else
+    {
+        var connectionUrl = Environment.GetEnvironmentVariable("DATABASE_URL")!;
+        var databaseUri = new Uri(connectionUrl!);
+        var db = databaseUri.LocalPath.TrimStart('/');
+        var userInfo = databaseUri.UserInfo.Split(':', StringSplitOptions.RemoveEmptyEntries);
+        options.UseNpgsql($"User ID={userInfo[0]};Password={userInfo[1]};Host={databaseUri.Host};Port={databaseUri.Port};Database={db};Pooling=true;SSL Mode=Require;Trust Server Certificate=True;");
+    }
+});
 
 var app = builder.Build();
 

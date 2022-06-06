@@ -1,4 +1,5 @@
-using CP.Api.ApplicationDbContext;
+using CP.Api.Context;
+
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);

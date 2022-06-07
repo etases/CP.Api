@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CP.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20220606143548_Init")]
+    [Migration("20220607015013_Init")]
     partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -115,6 +115,10 @@ namespace CP.Api.Migrations
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Keyword")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<int?>("ParentId")
                         .HasColumnType("integer");

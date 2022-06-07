@@ -5,12 +5,12 @@ namespace CP.Api.Models;
 
 public class Role
 {
-    [Key]
-    public int Id { get; set; }
-    [Required]
-    public string Name { get; set; } = null!;
+    [Key] public int Id { get; set; }
+
+    [Required] public string Name { get; set; } = null!;
+
     public string? Note { get; set; }
-    
-    [InverseProperty("Role")]
+
+    [InverseProperty(nameof(Account.Role))]
     public virtual ICollection<Account> Accounts { get; set; } = null!;
 }

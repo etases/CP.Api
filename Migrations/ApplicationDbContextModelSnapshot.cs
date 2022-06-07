@@ -114,6 +114,10 @@ namespace CP.Api.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("Keyword")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<int?>("ParentId")
                         .HasColumnType("integer");
 

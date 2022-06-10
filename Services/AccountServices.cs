@@ -12,10 +12,9 @@ namespace CP.Api.Services
             this.context = context;
         }
 
-        public (bool ok, int id)CreateAccount(Account account)
+        public bool CreateAccount(Account account)
         {
             bool ok = false;
-            int id = -1;
 
             var existingAccount = context.Accounts.Where(a => a.Username == account.Username && !a.IsBanned);
 
@@ -27,10 +26,9 @@ namespace CP.Api.Services
                 context.Accounts.Add(newAccount);
                 context.SaveChanges();
                 ok = true;
-                id = newAccount.Id;
             }
 
-            return (ok, id);
+            return ok;
         }
 
         public bool ChangeInfo(Account account)

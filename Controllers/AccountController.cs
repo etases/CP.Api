@@ -1,43 +1,141 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Security.Claims;
+
+using CP.Api.Interfaces;
+using CP.Api.Models;
+
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace CP.Api.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("[controller]")]
     public class AccountController : ControllerBase
     {
-        // GET: api/<AccountController>
+        private readonly IAccountService accountService;
+
+        public AccountController(IAccountService accountService)
+        {
+            this.accountService = accountService;
+        }
+
         [HttpGet]
-        public IEnumerable<string> Get()
+        public ActionResult Version()
         {
-            return new string[] { "value1", "value2" };
+            return Ok(new { Version = "1.00" });
         }
 
-        // GET api/<AccountController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        [AllowAnonymous]
+        [HttpPost("Login")]
+        public ActionResult Login(string Username, string Password)
         {
-            return "value";
+            var resp = accountService.Login(Username, Password);
+
+            var ret = resp == null ? (ActionResult)Unauthorized("User not found.") : Ok(resp);
+
+            return ret;
         }
 
-        // POST api/<AccountController>
-        [HttpPost]
-        public void Post([FromBody] string value)
+        [Authorize]
+        [HttpPost("Logout")]
+        public ActionResult Logout(Account account)
         {
+            accountService.Logout(account);
+            return Ok();
         }
 
-        // PUT api/<AccountController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [Authorize]
+        [HttpPost()]
+        public ActionResult CreateAccount(Account req)
         {
+            ActionResult ret;
+
+            var res = accountService.CreateAccount(req);
+
+            if (!res.ok)
+            {
+                ret = BadRequest($"Username {req.Username} already exists.");
+            }
+            else
+            {
+                ret = Ok(new { Id = res.id });
+            }
+
+            return ret;
         }
 
-        // DELETE api/<AccountController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        [Authorize]
+        [HttpPost()]
+        public ActionResult BanAccount(Account account)
         {
+            accountService.BanAccount(account);
+            return Ok();
         }
+
+        [Authorize]
+        [HttpPost()]
+        public ActionResult UnbanAccount(Account account)
+        {
+            accountService.UnbanAccount(account);
+            return Ok();
+        }
+
+        [Authorize]
+        [HttpPost()]
+        public ActionResult DisableAccount(Account account)
+        {
+            accountService.DisableAccount(account);
+            return Ok();
+        }
+
+        [Authorize]
+        [HttpPost()]
+        public ActionResult EnableAccount(Account account)
+        {
+            accountService.EnableAccount(account);
+            return Ok();
+        }
+
+        [Authorize]
+        [HttpPatch()]
+        public ActionResult ChangeInfo(Account account)
+        {
+            ActionResult ret;
+
+            bool ok = accountService.ChangeInfo(account);
+            ret = ok ? Ok() : BadRequest($"Username {account.Username} already exists.");
+
+            return ret;
+        }
+
+        //private string GetToken()
+        //{
+        //    var claims = User.Identity as ClaimsIdentity;
+        //    var token = claims.FindFirst("token").Value;
+
+        //    return token;
+        //}
+
+        //[Authorize]
+        //[HttpPost("expireToken")]
+        //public ActionResult ExpireToken()
+        //{
+        //    var token = GetToken();
+        //    accountService.ExpireToken(token);
+
+        //    return Ok();
+        //}
+
+        //[Authorize]
+        //[HttpPost("expireRefreshToken")]
+        //public ActionResult ExpireRefreshToken()
+        //{
+        //    var token = GetToken();
+        //    accountService.ExpireRefreshToken(token);
+
+        //    return Ok();
+        //}
     }
 }

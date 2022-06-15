@@ -32,4 +32,6 @@ public class Account
 
     [InverseProperty(nameof(Comment.Account))]
     public virtual ICollection<Comment> Comments { get; set; } = null!;
+
+    [InverseProperty("Account")] public ICollection<Vote> Votes { get; set; } = null!;
 }

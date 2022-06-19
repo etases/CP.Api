@@ -1,6 +1,9 @@
 using CP.Api.Context;
 
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 var buildEnv = builder.Environment;
@@ -12,6 +15,21 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Add JWT Auth
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters()
+    {
+        ValidateIssuer = true, // Validate the issuer
+        ValidateAudience = true, // Validate the audience
+        ValidAudience = builder.Configuration["Jwt:Audience"], // The valid audience
+        ValidIssuer = builder.Configuration["Jwt:Issuer"], // The valid issuer
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])) // The key to sign the token
+    };
+});
 
 builder.Services.AddDbContextPool<ApplicationDbContext>(options =>
 {
@@ -37,6 +55,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Add Auth middleware
+app.UseAuthentication();
 
 app.UseAuthorization();
 

@@ -38,19 +38,12 @@ public class Account
     [InverseProperty(nameof(Comment.Account))]
     public virtual ICollection<Comment> Comments { get; set; } = null!;
 
-    public void Login(long ts)
-    {
-        AccessToken = Guid.NewGuid().ToString();
-        RefreshToken = Guid.NewGuid().ToString();
-        //ExpiresIn = Constants.ONE_DAY_IN_SECONDS;
-        //ExpiresOn = ts + ExpiresIn;
-    }
+    //public void Login(long ts)
+    //{
+    //    AccessToken = Guid.NewGuid().ToString();
+    //    RefreshToken = Guid.NewGuid().ToString();
+    //    //ExpiresIn = Constants.ONE_DAY_IN_SECONDS;
+    //    //ExpiresOn = ts + ExpiresIn;
+    //}
 
-    public void Logout()
-    {
-        AccessToken = null;
-        RefreshToken = null;
-        //ExpiresIn = null;
-        //ExpiresOn = null;
-    }
 }

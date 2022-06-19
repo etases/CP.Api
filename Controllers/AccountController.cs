@@ -21,121 +21,69 @@ namespace CP.Api.Controllers
             this.accountService = accountService;
         }
 
-        [HttpGet]
-        public ActionResult Version()
+        [AllowAnonymous]
+        [HttpPost("Register")]
+        public ActionResult CreateAccount(Account account)
         {
-            return Ok(new { Version = "1.00" });
+            var result = accountService.CreateAccount(account);
+
+            ActionResult ret = result == null ? BadRequest($"Username {account.Username} already exists.") : Ok();
+
+            return ret;
         }
 
         [AllowAnonymous]
         [HttpPost("Login")]
         public ActionResult Login(string Username, string Password)
         {
-            var resp = accountService.Login(Username, Password);
+            var result = accountService.Login(Username, Password);
 
-            var ret = resp == null ? (ActionResult)Unauthorized("User not found.") : Ok(resp);
-
-            return ret;
-        }
-
-        [Authorize]
-        [HttpPost("Logout")]
-        public ActionResult Logout(Account account)
-        {
-            accountService.Logout(account);
-            return Ok();
-        }
-
-        [Authorize]
-        [HttpPost()]
-        public ActionResult CreateAccount(Account req)
-        {
-            ActionResult ret;
-
-            var res = accountService.CreateAccount(req);
-
-            if (!res.ok)
-            {
-                ret = BadRequest($"Username {req.Username} already exists.");
-            }
-            else
-            {
-                ret = Ok(new { Id = res.id });
-            }
+            ActionResult ret = result == null ? (ActionResult)Unauthorized("User not found.") : Ok(result);
 
             return ret;
-        }
-
-        [Authorize]
-        [HttpPost()]
-        public ActionResult BanAccount(Account account)
-        {
-            accountService.BanAccount(account);
-            return Ok();
-        }
-
-        [Authorize]
-        [HttpPost()]
-        public ActionResult UnbanAccount(Account account)
-        {
-            accountService.UnbanAccount(account);
-            return Ok();
-        }
-
-        [Authorize]
-        [HttpPost()]
-        public ActionResult DisableAccount(Account account)
-        {
-            accountService.DisableAccount(account);
-            return Ok();
-        }
-
-        [Authorize]
-        [HttpPost()]
-        public ActionResult EnableAccount(Account account)
-        {
-            accountService.EnableAccount(account);
-            return Ok();
         }
 
         [Authorize]
         [HttpPatch()]
-        public ActionResult ChangeInfo(Account account)
+        public ActionResult UpdateProfile(Account account)
         {
-            ActionResult ret;
+            var res = accountService.UpdateProfile(account);
 
-            bool ok = accountService.ChangeInfo(account);
-            ret = ok ? Ok() : BadRequest($"Username {account.Username} already exists.");
+            ActionResult ret = res == null ? BadRequest($"Something wrong while updating.") : Ok();
 
             return ret;
         }
 
-        //private string GetToken()
-        //{
-        //    var claims = User.Identity as ClaimsIdentity;
-        //    var token = claims.FindFirst("token").Value;
+        [Authorize]
+        [HttpPost()]
+        public ActionResult BanAccount(int id)
+        {
+            accountService.BanAccount(id);
+            return Ok();
+        }
 
-        //    return token;
-        //}
+        [Authorize]
+        [HttpPost()]
+        public ActionResult UnbanAccount(int id)
+        {
+            accountService.UnbanAccount(id);
+            return Ok();
+        }
 
-        //[Authorize]
-        //[HttpPost("expireToken")]
-        //public ActionResult ExpireToken()
-        //{
-        //    var token = GetToken();
-        //    accountService.ExpireToken(token);
+        [Authorize]
+        [HttpPost()]
+        public ActionResult DisableAccount(int id)
+        {
+            accountService.DisableAccount(id);
+            return Ok();
+        }
 
-        //    return Ok();
-        //}
-
-        //[Authorize]
-        //[HttpPost("expireRefreshToken")]
-        //public ActionResult ExpireRefreshToken()
-        //{
-        //    var token = GetToken();
-        //    accountService.ExpireRefreshToken(token);
-
-        //    return Ok();
-        //}
+        [Authorize]
+        [HttpPost()]
+        public ActionResult EnableAccount(int id)
+        {
+            accountService.EnableAccount(id);
+            return Ok();
+        }
     }
 }

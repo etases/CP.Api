@@ -20,5 +20,6 @@ public class ApplicationDbContext: DbContext
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<Vote>().HasKey(v => new { v.AccountId, v.CommentId });
+        modelBuilder.Entity<Role>().HasData(DefaultRoles.Administrator, DefaultRoles.User, DefaultRoles.Manager);
     }
 }

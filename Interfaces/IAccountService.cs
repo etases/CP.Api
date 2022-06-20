@@ -1,16 +1,13 @@
-﻿using CP.Api.DTOs;
-using CP.Api.Models;
+﻿using CP.Api.DTOs.Account;
 
 namespace CP.Api.Interfaces
 {
     public interface IAccountService
     {
-        LoginResponse Login(string Username, string Password);
-        RegisterResponse CreateAccount(Account account);
-        UpdateProfileResponse UpdateProfile(Account account);
-        void DisableAccount(int id);
-        void EnableAccount(int id);
-        void BanAccount(int id);
-        void UnbanAccount(int id);
+        (bool found, AccountOutput? output) Login(LoginInput input);
+        (bool existed, AccountOutput? output) Register(RegisterInput input);
+        AccountOutput? UpdateProfile(int id, UpdateProfileInput input);
+        bool SetDisableStatus(int id, bool disable);
+        bool SetBanStatus(int id, bool ban);
     }
 }

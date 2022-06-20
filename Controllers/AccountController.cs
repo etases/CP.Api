@@ -1,10 +1,14 @@
-﻿using CP.Api.Interfaces;
-using CP.Api.Models;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+
+using CP.Api.DTOs.Account;
+using CP.Api.DTOs.Response;
+using CP.Api.Interfaces;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using Microsoft.IdentityModel.Tokens;
 
 namespace CP.Api.Controllers
 {
@@ -12,76 +16,135 @@ namespace CP.Api.Controllers
     [Route("[controller]")]
     public class AccountController : ControllerBase
     {
-        private readonly IAccountService accountService;
+        private readonly IConfiguration _configuration;
+        private readonly IAccountService _accountService;
 
-        public AccountController(IAccountService accountService)
+        public AccountController(IAccountService accountService, IConfiguration configuration)
         {
-            this.accountService = accountService;
+            _accountService = accountService;
+            _configuration = configuration;
         }
-
-        [AllowAnonymous]
+        
         [HttpPost("Register")]
-        public ActionResult CreateAccount(Account account)
+        public ActionResult<ResponseDTO<AccountOutput>> Register(RegisterInput registerInput)
         {
-            var result = accountService.CreateAccount(account);
-
-            ActionResult ret = result == null ? BadRequest($"Username {account.Username} already exists.") : Ok();
-
-            return ret;
+            var result = _accountService.Register(registerInput);
+            if (result.existed)
+            {
+                return BadRequest(new ResponseDTO<AccountOutput>
+                {
+                    Success = false,
+                    Message = "User already existed",
+                });
+            }
+            
+            return Ok(new ResponseDTO<AccountOutput>
+            {
+                Success = true,
+                Message = "Register successfully",
+                Data = result.output,
+            });
         }
-
-        [AllowAnonymous]
+        
         [HttpPost("Login")]
-        public ActionResult Login(string Username, string Password)
+        public ActionResult<ResponseDTO<string>> Login(LoginInput loginInput)
         {
-            var result = accountService.Login(Username, Password);
+            var result = _accountService.Login(loginInput);
 
-            ActionResult ret = result == null ? (ActionResult)Unauthorized("User not found.") : Ok(result);
+            if (result.output == null)
+            {
+                return BadRequest(new ResponseDTO<string>
+                {
+                    Success = false,
+                    Message = "Login failed"
+                });
+            }
+            
+            var account = result.output;
+            
+            //create claims details based on the user information
+            var claims = new[] {
+                new Claim(JwtRegisteredClaimNames.Sub, _configuration["Jwt:Subject"]),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
+                new Claim(ClaimTypes.Role, account.Role.Name),
+                new Claim(ClaimTypes.Name, account.Username)
+            };
 
-            return ret;
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+
+            var signIn = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(_configuration["Jwt:Issuer"], _configuration["Jwt:Audience"], claims, expires: DateTime.UtcNow.AddDays(1), signingCredentials: signIn);
+
+            return Ok(new ResponseDTO<string>
+            {
+                Success = true,
+                Message = "Login successfully",
+                Data = new JwtSecurityTokenHandler().WriteToken(token)
+            });
         }
 
         [Authorize]
-        [HttpPatch()]
-        public ActionResult UpdateProfile(Account account)
+        [HttpPut("{id}")]
+        public ActionResult<ResponseDTO<AccountOutput>> UpdateProfile(int id, UpdateProfileInput updateProfileInput)
         {
-            var res = accountService.UpdateProfile(account);
-
-            ActionResult ret = res == null ? BadRequest($"Something wrong while updating.") : Ok();
-
-            return ret;
+            var res = _accountService.UpdateProfile(id, updateProfileInput);
+            if (res == null)
+            {
+                return BadRequest(new ResponseDTO<AccountOutput>
+                {
+                    Success = false,
+                    Message = "Update profile failed"
+                });
+            }
+            
+            return Ok(new ResponseDTO<AccountOutput>
+            {
+                Success = true,
+                Message = "Update profile successfully",
+                Data = res
+            });
         }
 
         [Authorize]
-        [HttpPost()]
-        public ActionResult BanAccount(int id)
+        [HttpPut("Ban/{id}")]
+        public ActionResult<ResponseDTO> BanAccount(int id, bool ban)
         {
-            accountService.BanAccount(id);
-            return Ok();
+            if (_accountService.SetBanStatus(id, ban))
+            {
+                return Ok(new ResponseDTO
+                {
+                    Success = true,
+                    Message = "Set Ban account successfully"
+                });
+            }
+            
+            return BadRequest(new ResponseDTO
+            {
+                Success = false,
+                Message = "Set Ban account failed"
+            });
         }
 
         [Authorize]
-        [HttpPost()]
-        public ActionResult UnbanAccount(int id)
+        [HttpPut("Disable/{id}")]
+        public ActionResult DisableAccount(int id, bool disable)
         {
-            accountService.UnbanAccount(id);
-            return Ok();
-        }
-
-        [Authorize]
-        [HttpPost()]
-        public ActionResult DisableAccount(int id)
-        {
-            accountService.DisableAccount(id);
-            return Ok();
-        }
-
-        [Authorize]
-        [HttpPost()]
-        public ActionResult EnableAccount(int id)
-        {
-            accountService.EnableAccount(id);
-            return Ok();
+            if (_accountService.SetDisableStatus(id, disable))
+            {
+                return Ok(new ResponseDTO
+                {
+                    Success = true,
+                    Message = "Set Disable account successfully"
+                });
+            }
+            
+            return BadRequest(new ResponseDTO
+            {
+                Success = false,
+                Message = "Set Disable account failed"
+            });
         }
     }
 }

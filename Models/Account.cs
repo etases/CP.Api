@@ -26,24 +26,12 @@ public class Account
     public string LastName { get; set; } = null!;
     public string Address { get; set; } = null!;
 
-    public string AccessToken { get; set; }
-    //public int? ExpiresIn { get; set; }
-    //public long? ExpiresOn { get; set; }
-
     [ForeignKey(nameof(RoleId))]
     [InverseProperty("Accounts")]
     public virtual Role Role { get; set; } = null!;
-    public string RefreshToken { get; set; }
 
     [InverseProperty(nameof(Comment.Account))]
     public virtual ICollection<Comment> Comments { get; set; } = null!;
 
-    //public void Login(long ts)
-    //{
-    //    AccessToken = Guid.NewGuid().ToString();
-    //    RefreshToken = Guid.NewGuid().ToString();
-    //    //ExpiresIn = Constants.ONE_DAY_IN_SECONDS;
-    //    //ExpiresOn = ts + ExpiresIn;
-    //}
-
+    [InverseProperty("Account")] public ICollection<Vote> Votes { get; set; } = null!;
 }

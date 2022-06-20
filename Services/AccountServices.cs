@@ -21,97 +21,86 @@ namespace CP.Api.Services
             this.context = context;
         }
 
-        public LoginResponse Login(string Username, string Password)
+        public LoginResponse Login(string username, string password)
         {
-            var existingUser = context.Accounts.Where(a => a.Username == Username && a.IsBanned == false && a.IsDisabled == false)
-                .ToList().SingleOrDefault(a => Hasher.HashPassword(a.SaltedPassword, Password) == a.HashedPassword);
+            var existingUser = context.Accounts.Where(a => a.Username == username && a.IsBanned == false && a.IsDisabled == false).SingleOrDefault(a => Hasher.HashPassword(a.SaltedPassword, password) == a.HashedPassword);
 
-            if (existingUser != null)
-                return new LoginResponse
-                {
-                    Username = Username,
-                    RoleId = existingUser.RoleId
-                };
-            else
-                return null;
+            return existingUser != null ? new LoginResponse {Username = username, RoleId = existingUser.RoleId} : null;
         }
 
         public RegisterResponse CreateAccount(Account account)
         {
-            //bool ok = false;
+            var existingAccount = context.Accounts.FirstOrDefault(a => a.Username == account.Username);
 
-            var existingAccount = context.Accounts.Where(a => a.Username == account.Username);
-
-            if (existingAccount == null)
+            if (existingAccount != null)
             {
-                var salt = Hasher.GenerateSalt();
-                var hashedPassword = Hasher.HashPassword(salt, account.HashedPassword);
-                var newAccount = new Account() 
-                { 
-                    Username = account.Username, 
-                    HashedPassword = hashedPassword,
-                    FirstName = account.FirstName,
-                    LastName = account.LastName,
-                    Address = account.Address,
-                    SaltedPassword = salt
-                };
-
-                RegisterResponse res = (RegisterResponse)newAccount;
-
-                context.Accounts.Add(newAccount);
-                context.SaveChanges();
-
-                return res;
-            }
-            else
                 return null;
+            }
+
+            var salt = Hasher.GenerateSalt();
+            var hashedPassword = Hasher.HashPassword(salt, account.HashedPassword);
+            var newAccount = new Account() 
+            { 
+                Username = account.Username, 
+                HashedPassword = hashedPassword,
+                FirstName = account.FirstName,
+                LastName = account.LastName,
+                Address = account.Address,
+                SaltedPassword = salt
+            };
+
+            RegisterResponse res = (RegisterResponse)newAccount;
+
+            context.Accounts.Add(newAccount);
+            context.SaveChanges();
+
+            return res;
+
         }
 
         public UpdateProfileResponse UpdateProfile(Account account)
         {
-            var existingUser = context.Accounts.Where(a => a.Username == account.Username && a.IsBanned == false && a.IsDisabled == false);
+            var existingUser = context.Accounts.FirstOrDefault(a => a.Username == account.Username && a.IsBanned == false && a.IsDisabled == false);
 
-            if (existingUser != null)
-            {
-                Account newInfo = context.Accounts.Single(a => a.Username == account.Username);
-                newInfo.FirstName = account.FirstName ?? newInfo.FirstName;
-                newInfo.LastName = account.LastName ?? newInfo.LastName;
-                newInfo.Address = account.Address ?? newInfo.Address;
+            if (existingUser == null)
+                return null;
 
-                context.SaveChanges();
+            Account newInfo = context.Accounts.Single(a => a.Username == account.Username);
+            newInfo.FirstName = account.FirstName ?? newInfo.FirstName;
+            newInfo.LastName = account.LastName ?? newInfo.LastName;
+            newInfo.Address = account.Address ?? newInfo.Address;
 
-                UpdateProfileResponse res = (UpdateProfileResponse)newInfo;
-                return res;
-            }
+            context.SaveChanges();
 
-            return null;
+            UpdateProfileResponse res = (UpdateProfileResponse)newInfo;
+            return res;
         }
 
         public void DisableAccount(int id)
         {
-            Account TmpAccount = context.Accounts.Single(a => a.Id == id);
-            TmpAccount.IsDisabled = true;
+            Account tmpAccount = context.Accounts.Single(a => a.Id == id);
+            tmpAccount.IsDisabled = true;
             context.SaveChanges();
         }
 
         public void EnableAccount(int id)
         {
-            Account TmpAccount = context.Accounts.Single(a => a.Id == id);
-            TmpAccount.IsDisabled = false;
+            Account tmpAccount = context.Accounts.Single(a => a.Id == id);
+            tmpAccount.IsDisabled = false;
             context.SaveChanges();
         }
 
         public void BanAccount(int id)
         {
-            Account TmpAccount = context.Accounts.Single(a => a.Id == id);
-            TmpAccount.IsBanned = true;
+            Account tmpAccount = context.Accounts.Single(a => a.Id == id);
+            tmpAccount.IsBanned = true;
             context.SaveChanges();
         }
 
         public void UnbanAccount(int id)
         {
-            Account TmpAccount = context.Accounts.Single(a => a.Id == id);
-            TmpAccount.IsBanned = false;
+            Account tmpAccount = context.Accounts.Single(a => a.Id == id);
+            tmpAccount.IsBanned = false;
             context.SaveChanges();
         }
     }

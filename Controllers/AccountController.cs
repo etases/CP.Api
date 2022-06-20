@@ -1,6 +1,4 @@
-﻿using System.Security.Claims;
-
-using CP.Api.Interfaces;
+﻿using CP.Api.Interfaces;
 using CP.Api.Models;
 
 using Microsoft.AspNetCore.Authorization;

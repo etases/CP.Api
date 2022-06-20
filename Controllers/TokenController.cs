@@ -6,7 +6,6 @@ using CP.Api.Context;
 using CP.Api.Models;
 using CP.Api.Services;
 
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 
@@ -16,7 +15,7 @@ namespace CP.Api.Controllers
     [ApiController]
     public class TokenController : ControllerBase
     {
-        public IConfiguration _configuration;
+        private readonly IConfiguration _configuration;
         private readonly ApplicationDbContext _context;
 
         public TokenController(IConfiguration config, ApplicationDbContext context)
@@ -53,15 +52,9 @@ namespace CP.Api.Controllers
 
                     return Ok(new JwtSecurityTokenHandler().WriteToken(token));
                 }
-                else
-                {
-                    return BadRequest("Invalid credentials");
-                }
             }
-            else
-            {
-                return BadRequest();
-            }
+
+            return BadRequest();
         }
 
     }

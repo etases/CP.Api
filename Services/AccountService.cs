@@ -6,6 +6,8 @@ using AutoMapper;
 using CP.Api.DTOs.Account;
 using CP.Api.Models;
 
+using Microsoft.EntityFrameworkCore;
+
 namespace CP.Api.Services
 {
     public class AccountService : IAccountService
@@ -21,7 +23,7 @@ namespace CP.Api.Services
 
         private IQueryable<Account> GetAccounts(bool checkBanned, bool checkDisabled)
         {
-            var accounts = _context.Accounts.AsQueryable();
+            var accounts = _context.Accounts.Include(a => a.Role).AsQueryable();
             if (checkBanned)
             {
                 accounts = accounts.Where(a => a.IsBanned == false);

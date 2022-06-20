@@ -6,12 +6,14 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 using CP.Api.Profiles;
+using CP.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 var buildEnv = builder.Environment;
 var buildConf = builder.Configuration;
 
 // Add services to the container.
+builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddAutoMapper(Profiles.AddProfile);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

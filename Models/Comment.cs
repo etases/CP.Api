@@ -31,8 +31,7 @@ public class Comment
     [ForeignKey(nameof(AccountId))]
     [InverseProperty("Comments")]
     public virtual Account Account { get; set; } = null!;
-
-    public bool Resolved { get; set; } = false;
+    
     public DateTime CreatedDate { get; set; } = DateTime.Now;
     public DateTime UpdatedDate { get; set; } = DateTime.Now;
 

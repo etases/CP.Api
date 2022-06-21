@@ -72,7 +72,8 @@ public class AccountController : ControllerBase
             new(JwtRegisteredClaimNames.Sub, _configuration["Jwt:Subject"]),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString(CultureInfo.InvariantCulture)),
-            new(ClaimTypes.Role, account.Role.Name), new(ClaimTypes.Name, account.Username)
+            new(ClaimTypes.Role, account.Role.Name), new(ClaimTypes.Name, account.Username),
+            new(ClaimTypes.NameIdentifier, account.Id.ToString())
         };
 
         SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));

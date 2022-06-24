@@ -14,6 +14,7 @@ var buildConf = builder.Configuration;
 
 // Add services to the container.
 builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<IVoteService, VoteService>();
 builder.Services.AddAutoMapper(Profiles.AddProfile);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

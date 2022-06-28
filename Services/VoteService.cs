@@ -5,7 +5,6 @@ using CP.Api.Models;
 
 namespace CP.Api.Services;
 
-
 public class VoteService : IVoteService
 {
     private readonly ApplicationDbContext _context;
@@ -25,6 +24,7 @@ public class VoteService : IVoteService
         {
             return false;
         }
+
         return true;
     }
 
@@ -32,12 +32,7 @@ public class VoteService : IVoteService
     //implement vote action
     public bool Vote(int accountId, int commentId, bool isUpvote)
     {
-        var vote = new Vote
-        {
-            AccountId = accountId,
-            CommentId = commentId,
-            IsUpvote = isUpvote
-        };
+        var vote = new Vote { AccountId = accountId, CommentId = commentId, IsUpvote = isUpvote };
 
         if (vote != null)
         {
@@ -69,13 +64,12 @@ public class VoteService : IVoteService
 
         return true;
     }
-
 }
-
 
 public interface IVoteService
 {
     bool Vote(int accountId, int commentId, bool isUpvote);
+
     //unvote if already voted
     bool Unvote(int accountId, int commentId);
     bool HasVoted(int accountId, int commentId);

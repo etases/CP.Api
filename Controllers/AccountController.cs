@@ -3,6 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
+using CP.Api.Core.Models;
 using CP.Api.DTOs.Account;
 using CP.Api.DTOs.Response;
 using CP.Api.Services;
@@ -38,6 +39,14 @@ public class AccountController : ControllerBase
         return Ok(new ResponseDTO<AccountOutput> {Data = account, Success = true, Message = "Account found"});
     }
 
+    [HttpGet("FromToken")]
+    [Authorize]
+    public ActionResult<ResponseDTO<AccountOutput>> GetFromToken()
+    {
+        var userId = int.Parse(User.FindFirst("Id")!.Value);
+        return Get(userId);
+    }
+
     [HttpPost("Register")]
     public ActionResult<ResponseDTO<AccountOutput>> Register(RegisterInput registerInput)
     {
@@ -65,22 +74,24 @@ public class AccountController : ControllerBase
         }
 
         AccountOutput? account = result.output;
+        
+        var jwtConf = _configuration.GetSection(key: "Jwt").Get<JWTModel>();
 
         //create claims details based on the user information
         Claim[] claims =
         {
-            new(JwtRegisteredClaimNames.Sub, _configuration["Jwt:Subject"]),
+            new(JwtRegisteredClaimNames.Sub, jwtConf.Subject),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString(CultureInfo.InvariantCulture)),
             new(ClaimTypes.Role, account.Role.Name), new(ClaimTypes.Name, account.Username),
-            new(ClaimTypes.NameIdentifier, account.Id.ToString())
+            new("Id", account.Id.ToString())
         };
 
-        SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+        SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(jwtConf.Key));
 
         SigningCredentials signIn = new(key, SecurityAlgorithms.HmacSha256);
 
-        JwtSecurityToken token = new(_configuration["Jwt:Issuer"], _configuration["Jwt:Audience"],
+        JwtSecurityToken token = new(jwtConf.Issuer, jwtConf.Audience,
             claims, expires: DateTime.UtcNow.AddDays(1), signingCredentials: signIn);
 
         return Ok(new ResponseDTO<string>

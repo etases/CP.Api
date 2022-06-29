@@ -25,6 +25,12 @@ public static class ProductServices
                         implementationType: typeof(VoteService),
                         lifetime: ServiceLifetime.Scoped
                     ),
+                    new
+                    (
+                        serviceType: typeof(ICategoryService),
+                        implementationType: typeof(CategoryService),
+                        lifetime: ServiceLifetime.Scoped
+                    ),
                 }
         };
     }

@@ -1,6 +1,7 @@
 using AutoMapper;
 
 using CP.Api.Context;
+using CP.Api.DTOs.Vote;
 using CP.Api.Models;
 
 namespace CP.Api.Services;
@@ -20,75 +21,49 @@ public class VoteService : IVoteService
     public bool HasVoted(int accountId, int commentId)
     {
         var vote = _context.Votes.SingleOrDefault(v => v.AccountId == accountId && v.CommentId == commentId);
-        if (vote == null)
-        {
-            return false;
-        }
-
-        return true;
+        return vote != null;
     }
 
 
     //implement vote action
-    public bool Vote(int accountId, int commentId, bool isUpvote)
+    public void HandleVote(VoteDTO voteDTO)
     {
-        var vote = new Vote { AccountId = accountId, CommentId = commentId, IsUpvote = isUpvote };
+        var vote = _context.Votes.SingleOrDefault(v => v.AccountId == voteDTO.AccountId && v.CommentId == voteDTO.CommentId);
 
-
-        if (vote != null && isUpvote != vote.IsUpvote)
-        {
-            _context.Votes.Add(vote);
-            _context.SaveChanges();
-        }
-        else if (vote != null && isUpvote == vote.IsUpvote)
-        {
-            _context.Votes.Remove(vote);
-            _context.SaveChanges();
-        }
-        else
-        {
-            return false;
-        }
-
-
-        return true;
-    }
-
-    // unvote a comment
-    public bool Unvote(int accountId, int commentId)
-    {
-        var vote = _context.Votes.SingleOrDefault(v => v.AccountId == accountId && v.CommentId == commentId);
         if (vote != null)
         {
-            _context.Votes.Remove(vote);
-            _context.SaveChanges();
+            if (vote.IsUpvote != voteDTO.IsUpvote)
+            {
+                vote.IsUpvote = voteDTO.IsUpvote;
+                _context.Votes.Update(vote);
+            }
+            else
+            {
+                _context.Votes.Remove(vote);
+            }
         }
         else
         {
-            return false;
+            vote = _mapper.Map<Vote>(voteDTO);
+            _context.Votes.Add(vote);
         }
-
-        return true;
+        _context.SaveChanges();
     }
 
     //get vote count
     public int GetVoteCount(int commentId)
     {
         var votes = _context.Votes.Where(v => v.CommentId == commentId);
-        var upvotes = votes.Where(v => v.IsUpvote).Count();
-        var downvotes = votes.Where(v => !v.IsUpvote).Count();
+        var upVote = votes.Count(v => v.IsUpvote);
+        var downVote = votes.Count(v => !v.IsUpvote);
 
-        return upvotes - downvotes;
+        return upVote - downVote;
     }
 }
 
 public interface IVoteService
 {
-    bool Vote(int accountId, int commentId, bool isUpvote);
-
-    //unvote if already voted
-    bool Unvote(int accountId, int commentId);
+    void HandleVote(VoteDTO voteDTO);
     bool HasVoted(int accountId, int commentId);
-
     int GetVoteCount(int commentId);
 }

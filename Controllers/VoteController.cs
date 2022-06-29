@@ -60,4 +60,19 @@ public class VoteController : ControllerBase
             return BadRequest(new ResponseDTO<bool> { Success = false, Message = "Remove vote failed" });
         }
     }
+
+    //get vote count
+    [HttpGet("{commentId}")]
+    public ActionResult<ResponseDTO<int>> GetVoteCount(int commentId)
+    {
+        int result = _voteService.GetVoteCount(commentId);
+        if (result > 0)
+        {
+            return Ok(new ResponseDTO<int> { Success = true, Message = "Get vote count successfully", Data = result });
+        }
+        else
+        {
+            return BadRequest(new ResponseDTO<int> { Success = false, Message = "Get vote count failed" });
+        }
+    }
 }

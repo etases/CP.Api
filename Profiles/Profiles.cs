@@ -10,5 +10,6 @@ public static class Profiles
         config.AddProfile<RoleProfile>();
         config.AddProfile<VoteProfile>();
         config.AddProfile<CategoryProfile>();
+        config.AddProfile<CommentProfile>();
     }
 }

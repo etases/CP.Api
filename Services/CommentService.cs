@@ -1,7 +1,6 @@
-﻿using CP.Api.Context;
+﻿using AutoMapper;
 
-using AutoMapper;
-
+using CP.Api.Context;
 using CP.Api.DTOs.Comment;
 using CP.Api.Models;
 
@@ -11,7 +10,6 @@ namespace CP.Api.Services;
 
 public class CommentService : ICommentService
 {
-
     private readonly ApplicationDbContext _context;
     private readonly IMapper _mapper;
 
@@ -20,20 +18,13 @@ public class CommentService : ICommentService
         _context = context;
         _mapper = mapper;
     }
-    private IQueryable<Comment> GetComments()
-    {
-        var comments = _context.Comments.Include(c => c.Account).Include(c => c.Category).AsQueryable();
-
-        return comments;
-    }
 
     public CommentOutput? GetComment(int id)
     {
         var comment = GetComments().SingleOrDefault(c => c.Id == id);
         if (comment == null)
-        {
             return null;
-        }
+
         var output = _mapper.Map<CommentOutput>(comment);
         return output;
     }
@@ -41,45 +32,32 @@ public class CommentService : ICommentService
     public ICollection<CommentOutput> GetCommentByCategory(int id)
     {
         var comment = GetComments().Where(c => c.CategoryId == id).ToList();
-        if (comment == null)
-        {
-            return null;
-        }
-        var output = _mapper.Map<ICollection<CommentOutput>>(comment);
-
-        return output;
+        return _mapper.Map<ICollection<CommentOutput>>(comment);
     }
 
     public ICollection<CommentOutput> GetCommentByParent(int id)
     {
         var comment = GetComments().Where(c => c.ParentId == id).ToList();
-        if (comment == null)
-        {
-            return null;
-        }
-        var output = _mapper.Map<ICollection<CommentOutput>>(comment);
-
-        return output;
+        return _mapper.Map<ICollection<CommentOutput>>(comment);
     }
 
-    public CommentOutput? AddComment(int userId, CommentInput comment)
+    public CommentOutput? AddComment(int userId, CommentInput commentInput)
     {
-        Comment c = _mapper.Map<Comment>(comment);
+        var c = _mapper.Map<Comment>(commentInput);
         c.AccountId = userId;
         _context.Comments.Add(c);
         _context.SaveChanges();
-        CommentOutput output = _mapper.Map<CommentOutput>(c);
+        var output = _mapper.Map<CommentOutput>(c);
         return output;
     }
 
-    public CommentOutput? UpdateComment(int id, CommentUpdate comment)
+    public CommentOutput? UpdateComment(int id, CommentUpdate commentUpdate)
     {
-        var c = GetComments().SingleOrDefault(c => c.Id == id);
+        var c = GetComments().SingleOrDefault(c => c.Id == id && c.IsDeleted == false);
         if (c == null)
-        {
             return null;
-        }
-        _mapper.Map(comment, c);
+
+        _mapper.Map(commentUpdate, c);
         _context.Comments.Update(c);
         _context.SaveChanges();
 
@@ -89,14 +67,21 @@ public class CommentService : ICommentService
 
     public bool DeleteComment(int id)
     {
-        var comment = GetComments().SingleOrDefault(c => c.Id == id);
-        if (comment != null)
-        {
-            _context.Comments.Remove(comment);
-            _context.SaveChanges();
-            return true;
-        }
-        return false;
+        var comment = GetComments().SingleOrDefault(c => c.Id == id && c.IsDeleted == false);
+        if (comment == null)
+            return false;
+
+        comment.IsDeleted = true;
+        _context.Comments.Update(comment);
+        _context.SaveChanges();
+        return true;
+    }
+
+    private IQueryable<Comment> GetComments()
+    {
+        return _context.Comments
+            .Include(c => c.Account)
+            .Include(c => c.Category);
     }
 }
 
@@ -105,7 +90,7 @@ public interface ICommentService
     CommentOutput? GetComment(int id);
     ICollection<CommentOutput> GetCommentByCategory(int cateId);
     ICollection<CommentOutput> GetCommentByParent(int parentId);
-    CommentOutput? AddComment(int userId, CommentInput comment);
-    CommentOutput? UpdateComment(int commentId, CommentUpdate comment);
+    CommentOutput? AddComment(int userId, CommentInput commentInput);
+    CommentOutput? UpdateComment(int commentId, CommentUpdate commentUpdate);
     bool DeleteComment(int commentId);
 }

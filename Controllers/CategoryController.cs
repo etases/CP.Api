@@ -1,6 +1,5 @@
 using CP.Api.DTOs;
 using CP.Api.DTOs.Response;
-using CP.Api.Models;
 using CP.Api.Services;
 
 using Microsoft.AspNetCore.Mvc;
@@ -20,17 +19,38 @@ public class CategoryController : ControllerBase
 
     //get all categories
     [HttpGet]
-    public ICollection<Category> GetAllCategories() => _categoryService.GetAllCategories();
+    public ResponseDTO<ICollection<CategoryOutput>> GetAllCategories()
+    {
+        return new ResponseDTO<ICollection<CategoryOutput>>
+        {
+            Data = _categoryService.GetAllCategories(), Success = true, Message = "Get all categories"
+        };
+    }
 
     //get category by id
     [HttpGet("{id}")]
-    public Category GetCategoryById(int id) => _categoryService.GetCategoryById(id);
+    public ActionResult<ResponseDTO<CategoryOutput>> GetCategoryById(int id)
+    {
+        CategoryOutput? category = _categoryService.GetCategoryById(id);
+        if (category == null)
+        {
+            return NotFound(new ResponseDTO {Success = false, Message = "Category not found"});
+        }
+
+        return Ok(new ResponseDTO<CategoryOutput> {Data = category, Success = true, Message = "Get category by id"});
+    }
 
     //create category
     [HttpPost]
-    public ActionResult<Category> CreateCategory(CategoryDTO categoryDto)
+    public ActionResult<ResponseDTO<CategoryOutput>> CreateCategory(CategoryInput categoryInput)
     {
-        var newCategory = _categoryService.CreateCategory(categoryDto);
-        return CreatedAtAction(nameof(GetCategoryById), new { id = newCategory.Id }, newCategory);
+        CategoryOutput? category = _categoryService.CreateCategory(categoryInput);
+        if (category == null)
+        {
+            return BadRequest(new ResponseDTO {Success = false, Message = "Category existed"});
+        }
+
+        return CreatedAtAction(nameof(GetCategoryById), new {id = category.Id},
+            new ResponseDTO<CategoryOutput> {Data = category, Success = true, Message = "Category created"});
     }
 }

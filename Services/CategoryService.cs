@@ -18,38 +18,45 @@ public class CategoryService : ICategoryService
     }
 
     //get all categories
-    public ICollection<Category> GetAllCategories() => _dbContext.Categories.ToList();
+    public ICollection<CategoryOutput> GetAllCategories()
+    {
+        var categories = _dbContext.Categories.ToList();
+        var output = _mapper.Map<ICollection<CategoryOutput>>(categories);
+        return output;
+    }
 
     //get category by id
-    public Category GetCategoryById(int id)
+    public CategoryOutput? GetCategoryById(int id)
     {
         var category = _dbContext.Categories.FirstOrDefault(c => c.Id == id);
         if (category == null)
         {
-            throw new Exception("Category not found");
+            return null;
         }
-        return category;
+        var output = _mapper.Map<CategoryOutput>(category);
+        return output;
     }
 
     //create category
-    public Category CreateCategory(CategoryDTO categoryDto)
+    public CategoryOutput? CreateCategory(CategoryInput categoryInput)
     {
-        var existCategory = _dbContext.Categories.FirstOrDefault(x => x.Name == categoryDto.Name);
+        var existCategory = _dbContext.Categories.FirstOrDefault(x => x.Name == categoryInput.Name);
         if (existCategory != null)
         {
-            throw new Exception("Category already exists");
+            return null;
         }
-        existCategory = _mapper.Map<Category>(categoryDto);
+        existCategory = _mapper.Map<Category>(categoryInput);
         _dbContext.Categories.Add(existCategory);
         _dbContext.SaveChanges();
-        return existCategory;
+        var output = _mapper.Map<CategoryOutput>(existCategory);
+        return output;
     }
 
 }
 
 public interface ICategoryService
 {
-    ICollection<Category> GetAllCategories();
-    Category GetCategoryById(int id);
-    Category CreateCategory(CategoryDTO category);
+    ICollection<CategoryOutput> GetAllCategories();
+    CategoryOutput? GetCategoryById(int id);
+    CategoryOutput? CreateCategory(CategoryInput category);
 }

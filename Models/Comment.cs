@@ -32,8 +32,12 @@ public class Comment
     [InverseProperty("Comments")]
     public virtual Account Account { get; set; } = null!;
     
+    [Column(TypeName = "timestamp without time zone")]
     public DateTime CreatedDate { get; set; } = DateTime.Now;
+    [Column(TypeName = "timestamp without time zone")]
     public DateTime UpdatedDate { get; set; } = DateTime.Now;
+    
+    public bool IsDeleted { get; set; } = false;
 
     [InverseProperty("Comment")] public ICollection<Vote> Votes { get; set; } = null!;
 

@@ -1,8 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-using CP.Api.DTOs.Account;
-using CP.Api.DTOs.Category;
+﻿using CP.Api.DTOs.Account;
 
 namespace CP.Api.DTOs.Comment;
 
@@ -16,8 +12,8 @@ public class CommentOutput
     public int AccountId { get; set; } 
     public DateTime CreatedDate { get; set; } = DateTime.Now;
     public DateTime UpdatedDate { get; set; } = DateTime.Now;
+    public bool IsDeleted { get; set; } = false;
 
     public virtual AccountOutput Account { get; set; } = null!;
-    //public virtual CategorySimple Category { get; set; } = null!;
-
+    public virtual CategoryOutput Category { get; set; } = null!;
 }

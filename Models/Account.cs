@@ -20,6 +20,7 @@ public class Account
     public bool IsDisabled { get; set; } = false;
     public bool IsBanned { get; set; } = false;
 
+    [Column(TypeName = "timestamp without time zone")]
     public DateTime CreatedDay { get; set; } = DateTime.Now;
 
     public string FirstName { get; set; } = null!;

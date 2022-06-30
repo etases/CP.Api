@@ -1,10 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-using CP.Api.DTOs.Account;
-using CP.Api.DTOs.Category;
-
-namespace CP.Api.DTOs.Comment;
+﻿namespace CP.Api.DTOs.Comment;
 
 public class CommentInput
 {

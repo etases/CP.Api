@@ -43,7 +43,7 @@ public class AccountController : ControllerBase
     [Authorize]
     public ActionResult<ResponseDTO<AccountOutput>> GetFromToken()
     {
-        var userId = int.Parse(User.FindFirst("Id")!.Value);
+        int userId = int.Parse(User.FindFirst("Id")!.Value);
         return Get(userId);
     }
 
@@ -74,8 +74,8 @@ public class AccountController : ControllerBase
         }
 
         AccountOutput? account = result.output;
-        
-        var jwtConf = _configuration.GetSection(key: "Jwt").Get<JWTModel>();
+
+        JWTModel? jwtConf = _configuration.GetSection("Jwt").Get<JWTModel>();
 
         //create claims details based on the user information
         Claim[] claims =

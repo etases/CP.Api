@@ -10,13 +10,15 @@ namespace CP.Api.Controllers;
 [Route("[controller]")]
 public class VoteController : ControllerBase
 {
-    private readonly IVoteService _voteService;
     private readonly IAccountService _accountService;
+    private readonly ICommentService _commentService;
+    private readonly IVoteService _voteService;
 
-    public VoteController(IVoteService voteService, IAccountService accountService)
+    public VoteController(IVoteService voteService, IAccountService accountService, ICommentService commentService)
     {
         _voteService = voteService;
         _accountService = accountService;
+        _commentService = commentService;
     }
 
     //handle comment vote
@@ -25,15 +27,16 @@ public class VoteController : ControllerBase
     {
         if (_accountService.GetAccount(voteDTO.AccountId) == null)
         {
-            return NotFound(new ResponseDTO { ErrorCode = 1, Message = "Account Not Found" });
+            return NotFound(new ResponseDTO {ErrorCode = 1, Message = "Account Not Found"});
         }
-        // TODO: check if comment exists
-        if (false)
+
+        if (_commentService.GetComment(voteDTO.CommentId) == null)
         {
-            return NotFound(new ResponseDTO { ErrorCode = 2, Message = "Comment Not Found" });
+            return NotFound(new ResponseDTO {ErrorCode = 2, Message = "Comment Not Found"});
         }
+
         _voteService.HandleVote(voteDTO);
-        return Ok(new ResponseDTO { Success = true, Message = "Handle Vote successfully" });
+        return Ok(new ResponseDTO {Success = true, Message = "Handle Vote successfully"});
     }
 
     //get if user have voted the comment
@@ -42,27 +45,28 @@ public class VoteController : ControllerBase
     {
         if (_accountService.GetAccount(accountId) == null)
         {
-            return NotFound(new ResponseDTO { ErrorCode = 1, Message = "Account Not Found" });
+            return NotFound(new ResponseDTO {ErrorCode = 1, Message = "Account Not Found"});
         }
-        // TODO: check if comment exists
-        if (false)
+
+        if (_commentService.GetComment(commentId) == null)
         {
-            return NotFound(new ResponseDTO { ErrorCode = 2, Message = "Comment Not Found" });
+            return NotFound(new ResponseDTO {ErrorCode = 2, Message = "Comment Not Found"});
         }
+
         bool hasVoted = _voteService.HasVoted(accountId, commentId);
-        return Ok(new ResponseDTO<bool> { Success = true, Message = "Check Data For Has Voted Status", Data = hasVoted });
+        return Ok(new ResponseDTO<bool> {Success = true, Message = "Check Data For Has Voted Status", Data = hasVoted});
     }
 
     //get vote count
     [HttpGet("{commentId}")]
     public ActionResult<ResponseDTO<int>> GetVoteCount(int commentId)
     {
-        // TODO: check if comment exists
-        if (false)
+        if (_commentService.GetComment(commentId) == null)
         {
-            return NotFound(new ResponseDTO { ErrorCode = 2, Message = "Comment Not Found" });
+            return NotFound(new ResponseDTO {ErrorCode = 2, Message = "Comment Not Found"});
         }
+
         int result = _voteService.GetVoteCount(commentId);
-        return Ok(new ResponseDTO<int> { Success = true, Message = "Get vote count successfully", Data = result });
+        return Ok(new ResponseDTO<int> {Success = true, Message = "Get vote count successfully", Data = result});
     }
 }

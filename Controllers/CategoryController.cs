@@ -1,5 +1,4 @@
 using CP.Api.DTOs;
-using CP.Api.DTOs.Response;
 using CP.Api.Models;
 using CP.Api.Services;
 
@@ -20,17 +19,23 @@ public class CategoryController : ControllerBase
 
     //get all categories
     [HttpGet]
-    public ICollection<Category> GetAllCategories() => _categoryService.GetAllCategories();
+    public ICollection<Category> GetAllCategories()
+    {
+        return _categoryService.GetAllCategories();
+    }
 
     //get category by id
     [HttpGet("{id}")]
-    public Category GetCategoryById(int id) => _categoryService.GetCategoryById(id);
+    public Category GetCategoryById(int id)
+    {
+        return _categoryService.GetCategoryById(id);
+    }
 
     //create category
     [HttpPost]
     public ActionResult<Category> CreateCategory(CategoryDTO categoryDto)
     {
-        var newCategory = _categoryService.CreateCategory(categoryDto);
-        return CreatedAtAction(nameof(GetCategoryById), new { id = newCategory.Id }, newCategory);
+        Category newCategory = _categoryService.CreateCategory(categoryDto);
+        return CreatedAtAction(nameof(GetCategoryById), new {id = newCategory.Id}, newCategory);
     }
 }

@@ -15,5 +15,5 @@ public class CommentOutput
     public bool IsDeleted { get; set; } = false;
 
     public virtual AccountOutput Account { get; set; } = null!;
-    public virtual CategoryDTO Category { get; set; } = null!;
+    public virtual CategoryOutput Category { get; set; } = null!;
 }

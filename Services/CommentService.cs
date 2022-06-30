@@ -53,7 +53,7 @@ public class CommentService : ICommentService
 
     public CommentOutput? UpdateComment(int id, CommentUpdate commentUpdate)
     {
-        Comment? c = GetComments().SingleOrDefault(c => c.Id == id && c.IsDeleted == false);
+        var c = GetComments().SingleOrDefault(c => c.Id == id && c.IsDeleted == false);
         if (c == null)
             return null;
 
@@ -67,7 +67,7 @@ public class CommentService : ICommentService
 
     public bool DeleteComment(int id)
     {
-        Comment? comment = GetComments().SingleOrDefault(c => c.Id == id && c.IsDeleted == false);
+        var comment = GetComments().SingleOrDefault(c => c.Id == id && c.IsDeleted == false);
         if (comment == null)
             return false;
 
@@ -75,7 +75,6 @@ public class CommentService : ICommentService
         _context.Comments.Update(comment);
         _context.SaveChanges();
         return true;
-
     }
 
     private IQueryable<Comment> GetComments()

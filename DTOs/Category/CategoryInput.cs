@@ -1,6 +1,6 @@
 namespace CP.Api.DTOs;
 
-public class CategoryDTO
+public class CategoryInput
 {
     public string Name { get; set; } = null!;
 

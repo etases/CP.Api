@@ -1,5 +1,6 @@
 using CP.Api.DTOs;
 using CP.Api.DTOs.Response;
+using CP.Api.Extensions;
 using CP.Api.Services;
 
 using Microsoft.AspNetCore.Mvc;
@@ -19,11 +20,14 @@ public class CategoryController : ControllerBase
 
     //get all categories
     [HttpGet]
-    public ResponseDTO<ICollection<CategoryOutput>> GetAllCategories()
+    public PaginationResponseDTO<CategoryOutput> GetAllCategories(PaginationParameter parameter)
     {
-        return new ResponseDTO<ICollection<CategoryOutput>>
+        var pagedOutput = _categoryService.GetAllCategories()
+            .GetCount(out var count)
+            .GetPage(parameter);
+        return new PaginationResponseDTO<CategoryOutput>
         {
-            Data = _categoryService.GetAllCategories(), Success = true, Message = "Get all categories"
+            Data = pagedOutput, Success = true, Message = "Get all categories", TotalRecords = count
         };
     }
 

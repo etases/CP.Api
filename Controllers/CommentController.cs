@@ -1,5 +1,6 @@
 ﻿using CP.Api.DTOs.Comment;
 using CP.Api.DTOs.Response;
+using CP.Api.Extensions;
 using CP.Api.Services;
 
 using Microsoft.AspNetCore.Authorization;
@@ -31,23 +32,27 @@ public class CommentController : ControllerBase
     }
 
     [HttpGet("Category/{id}")]
-    public ActionResult<ResponseDTO<CommentOutput>> GetByCategory(int id)
+    public PaginationResponseDTO<CommentOutput> GetByCategory(int id, PaginationParameter parameter)
     {
-        ICollection<CommentOutput> comment = _commentService.GetCommentByCategory(id);
-        return Ok(new ResponseDTO<ICollection<CommentOutput>>
+        var pagedOutput = _commentService.GetCommentByCategory(id)
+            .GetCount(out var count)
+            .GetPage(parameter);
+        return new PaginationResponseDTO<CommentOutput>
         {
-            Data = comment, Success = true, Message = "Get comments successfully"
-        });
+            Data = pagedOutput, Success = true, Message = "Get comments successfully", TotalRecords = count
+        };
     }
 
     [HttpGet("Parent/{id}")]
-    public ActionResult<ResponseDTO<CommentOutput>> GetByParent(int id)
+    public PaginationResponseDTO<CommentOutput> GetByParent(int id, PaginationParameter parameter)
     {
-        ICollection<CommentOutput> comment = _commentService.GetCommentByParent(id);
-        return Ok(new ResponseDTO<ICollection<CommentOutput>>
+        var pagedOutput = _commentService.GetCommentByParent(id)
+            .GetCount(out var count)
+            .GetPage(parameter);
+        return new PaginationResponseDTO<CommentOutput>
         {
-            Data = comment, Success = true, Message = "Get comments successfully"
-        });
+            Data = pagedOutput, Success = true, Message = "Get comments successfully", TotalRecords = count
+        };
     }
 
     [HttpPost]

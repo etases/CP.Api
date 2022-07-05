@@ -25,18 +25,6 @@ namespace CP.Api.Controllers
             _categoryService = categoryService;
         }
 
-    //get all categories
-    [HttpGet]
-    public PaginationResponseDTO<CategoryOutput> GetAllCategories(PaginationParameter parameter)
-    {
-        var pagedOutput = _categoryService.GetAllCategories()
-            .GetCount(out var count)
-            .GetPage(parameter);
-        return new PaginationResponseDTO<CategoryOutput>
-        {
-            Data = pagedOutput, Success = true, Message = "Get all categories", TotalRecords = count
-        };
-    }
         /// <summary>
         /// Get all categories
         /// </summary>

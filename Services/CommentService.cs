@@ -29,10 +29,14 @@ public class CommentService : ICommentService
         return output;
     }
 
-    public ICollection<CommentOutput> GetCommentByCategory(int id)
+    public ICollection<CommentOutput> GetCommentByCategory(int id, bool includeChild)
     {
-        var comment = GetComments().Where(c => c.CategoryId == id).ToList();
-        return _mapper.Map<ICollection<CommentOutput>>(comment);
+        var comment = GetComments().Where(c => c.CategoryId == id);
+        if (!includeChild)
+        {
+            comment = comment.Where(c => c.ParentId == null);
+        }
+        return _mapper.Map<ICollection<CommentOutput>>(comment.ToList());
     }
 
     public ICollection<CommentOutput> GetCommentByParent(int id)
@@ -88,7 +92,7 @@ public class CommentService : ICommentService
 public interface ICommentService
 {
     CommentOutput? GetComment(int id);
-    ICollection<CommentOutput> GetCommentByCategory(int cateId);
+    ICollection<CommentOutput> GetCommentByCategory(int cateId, bool includeChild = false);
     ICollection<CommentOutput> GetCommentByParent(int parentId);
     CommentOutput? AddComment(int userId, CommentInput commentInput);
     CommentOutput? UpdateComment(int commentId, CommentUpdate commentUpdate);

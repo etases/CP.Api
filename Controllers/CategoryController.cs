@@ -5,18 +5,25 @@ using CP.Api.Services;
 
 using Microsoft.AspNetCore.Mvc;
 
-namespace CP.Api.Controllers;
-
-[ApiController]
-[Route("[controller]")]
-public class CategoryController : ControllerBase
+namespace CP.Api.Controllers
 {
-    private readonly ICategoryService _categoryService;
-
-    public CategoryController(ICategoryService categoryService)
+    /// <summary>
+    /// Category API controller
+    /// </summary>
+    [ApiController]
+    [Route("[controller]")]
+    public class CategoryController : ControllerBase
     {
-        _categoryService = categoryService;
-    }
+        private readonly ICategoryService _categoryService;
+
+        /// <summary>
+        /// Category controller constructor
+        /// </summary>
+        /// <param name="categoryService">Category service</param>
+        public CategoryController(ICategoryService categoryService)
+        {
+            _categoryService = categoryService;
+        }
 
     //get all categories
     [HttpGet]
@@ -30,31 +37,51 @@ public class CategoryController : ControllerBase
             Data = pagedOutput, Success = true, Message = "Get all categories", TotalRecords = count
         };
     }
-
-    //get category by id
-    [HttpGet("{id}")]
-    public ActionResult<ResponseDTO<CategoryOutput>> GetCategoryById(int id)
-    {
-        CategoryOutput? category = _categoryService.GetCategoryById(id);
-        if (category == null)
+        /// <summary>
+        /// Get all categories
+        /// </summary>
+        /// <returns>ResponseDTO <seealso cref="CategoryOutput[]"/></returns>
+        [HttpGet]
+        public ResponseDTO<ICollection<CategoryOutput>> GetAllCategories()
         {
-            return NotFound(new ResponseDTO {Success = false, Message = "Category not found"});
+            return new ResponseDTO<ICollection<CategoryOutput>>
+            {
+                Data = _categoryService.GetAllCategories(),
+                Success = true,
+                Message = "Get all categories"
+            };
         }
 
-        return Ok(new ResponseDTO<CategoryOutput> {Data = category, Success = true, Message = "Get category by id"});
-    }
-
-    //create category
-    [HttpPost]
-    public ActionResult<ResponseDTO<CategoryOutput>> CreateCategory(CategoryInput categoryInput)
-    {
-        CategoryOutput? category = _categoryService.CreateCategory(categoryInput);
-        if (category == null)
+        /// <summary>
+        /// Get category by id
+        /// </summary>
+        /// <param name="id">Id of the category</param>
+        /// <returns>ResponseDTO <seealso cref="CategoryOutput"/></returns>
+        [HttpGet("{id}")]
+        public ActionResult<ResponseDTO<CategoryOutput>> GetCategoryById(int id)
         {
-            return BadRequest(new ResponseDTO {Success = false, Message = "Category existed"});
+            CategoryOutput? category = _categoryService.GetCategoryById(id);
+            return category switch
+            {
+                null => NotFound(new ResponseDTO<CategoryOutput> { Message = "Category not found", Success = false }),
+                _ => Ok(new ResponseDTO<CategoryOutput> { Data = category, Success = true, Message = "Category found" })
+            };
         }
 
-        return CreatedAtAction(nameof(GetCategoryById), new {id = category.Id},
-            new ResponseDTO<CategoryOutput> {Data = category, Success = true, Message = "Category created"});
+        /// <summary>
+        /// Create category
+        /// </summary>
+        /// <param name="categoryInput">Information to create category</param>
+        /// <returns>ResponseDTO <seealso cref="CategoryOutput"/></returns>
+        [HttpPost]
+        public ActionResult<ResponseDTO<CategoryOutput>> CreateCategory(CategoryInput categoryInput)
+        {
+            CategoryOutput? category = _categoryService.CreateCategory(categoryInput);
+            return category switch
+            {
+                null => Conflict(new ResponseDTO<CategoryOutput> { Message = "Category existed", Success = false }),
+                _ => Ok(new ResponseDTO<CategoryOutput> { Data = category, Success = true, Message = "Category created" })
+            };
+        }
     }
 }

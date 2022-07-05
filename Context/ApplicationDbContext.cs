@@ -2,24 +2,55 @@ using CP.Api.Models;
 
 using Microsoft.EntityFrameworkCore;
 
-namespace CP.Api.Context;
-
-public class ApplicationDbContext: DbContext
+namespace CP.Api.Context
 {
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+    /// <summary>
+    /// Db Context of the application
+    /// </summary>
+    public class ApplicationDbContext : DbContext
     {
-    }
-    
-    public virtual DbSet<Account> Accounts { get; set; }
-    public virtual DbSet<Role> Roles { get; set; }
-    public virtual DbSet<Category> Categories { get; set; }
-    public virtual DbSet<Comment> Comments { get; set; }
-    public virtual DbSet<Vote> Votes { get; set; }
+        /// <summary>
+        /// Constructor of the class
+        /// </summary>
+        /// <param name="options"> Db Context options</param>
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+        {
+        }
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        base.OnModelCreating(modelBuilder);
-        modelBuilder.Entity<Vote>().HasKey(v => new { v.AccountId, v.CommentId });
-        modelBuilder.Entity<Role>().HasData(DefaultRoles.Administrator, DefaultRoles.User, DefaultRoles.Manager);
+        /// <summary>
+        /// Account table
+        /// </summary>
+        public virtual DbSet<Account> Accounts { get; set; } = null!;
+
+        /// <summary>
+        /// Role table
+        /// </summary>
+        public virtual DbSet<Role> Roles { get; set; } = null!;
+
+        /// <summary>
+        /// Category table
+        /// </summary>
+        public virtual DbSet<Category> Categories { get; set; } = null!;
+
+        /// <summary>
+        /// Comment table
+        /// </summary>
+        public virtual DbSet<Comment> Comments { get; set; } = null!;
+
+        /// <summary>
+        /// Vote table
+        /// </summary>
+        public virtual DbSet<Vote> Votes { get; set; } = null!;
+
+        /// <summary>
+        /// Configure entity models to be used in the application
+        /// </summary>
+        /// <param name="modelBuilder">Entity model constructor</param>
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            _ = modelBuilder.Entity<Vote>().HasKey(v => new { v.AccountId, v.CommentId });
+            _ = modelBuilder.Entity<Role>().HasData(DefaultRoles.Administrator, DefaultRoles.User, DefaultRoles.Manager);
+        }
     }
 }

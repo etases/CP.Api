@@ -1,5 +1,6 @@
-﻿using CP.Api.DTOs.Comment;
+using CP.Api.DTOs.Comment;
 using CP.Api.DTOs.Response;
+using CP.Api.Extensions;
 using CP.Api.Services;
 
 using Microsoft.AspNetCore.Authorization;
@@ -40,42 +41,38 @@ namespace CP.Api.Controllers
                 _ => Ok(new ResponseDTO<CommentOutput> { Data = comment, Success = true, Message = "Comment found" })
             };
         }
-
+        
         /// <summary>
         /// Get topic by category id
         /// </summary>
         /// <remarks>
         /// FIXME: Rename endpoint for better readability
-        /// FIXME: Incorrect return type
-        /// FIXME: Only take comments that don't have a parent
-        /// FIXME: Add pagination
         /// </remarks>
         /// <param name="id">Id of the category</param>
-        /// <returns>ResponseDTO <seealso cref="CommentOutput[]"/></returns>
+        /// <param name="parameter">Pagination parameter</param>
+        /// <returns>PaginationResponseDTO <seealso cref="CommentOutput"/></returns>
         [HttpGet("Category/{id}")]
-        public ActionResult<ResponseDTO<CommentOutput>> GetByCategory(int id)
+        public PaginationResponseDTO<CommentOutput> GetByCategory(int id, PaginationParameter parameter)
         {
-            ICollection<CommentOutput> comment = _commentService.GetCommentByCategory(id);
-
-            return Ok(new ResponseDTO<ICollection<CommentOutput>>
+            var pagedOutput = _commentService.GetCommentByCategory(id)
+                .GetCount(out var count)
+                .GetPage(parameter);
+            return new PaginationResponseDTO<CommentOutput>
             {
-                Data = comment,
-                Success = true,
-                Message = "Get comments successfully"
-            });
+                Data = pagedOutput, Success = true, Message = "Get comments successfully", TotalRecords = count
+            };
         }
-
+        
         /// <summary>
         /// Get comment by parent comment id
         /// </summary>
         /// <remarks>
         /// FIXME: Rename endpoint for better readability
-        /// FIXME: Incorrect return type
         /// </remarks>
         /// <param name="id">Id of parent id</param>
         /// <returns>ResponseDTO <seealso cref="CommentOutput[]"/></returns>
         [HttpGet("Parent/{id}")]
-        public ActionResult<ResponseDTO<CommentOutput>> GetByParent(int id)
+        public ActionResult<ResponseDTO<ICollection<CommentOutput>>> GetByParent(int id)
         {
             ICollection<CommentOutput> comment = _commentService.GetCommentByParent(id);
             return Ok(new ResponseDTO<ICollection<CommentOutput>>

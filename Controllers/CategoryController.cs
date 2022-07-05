@@ -1,5 +1,6 @@
 using CP.Api.DTOs;
 using CP.Api.DTOs.Response;
+using CP.Api.Extensions;
 using CP.Api.Services;
 
 using Microsoft.AspNetCore.Mvc;

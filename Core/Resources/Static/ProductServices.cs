@@ -37,6 +37,12 @@ public static class ProductServices
                         implementationType: typeof(CommentService),
                         lifetime: ServiceLifetime.Scoped
                     ),
+                    new
+                    (
+                        serviceType: typeof(IStatisticService),
+                        implementationType: typeof(StatisticService),
+                        lifetime: ServiceLifetime.Scoped
+                    )
                 }
         };
     }

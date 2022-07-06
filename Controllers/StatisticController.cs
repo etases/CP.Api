@@ -30,8 +30,8 @@ namespace CP.Api.Controllers
         /// <param name="id">Id of resource</param>
         /// <param name="input">Detail of request</param>
         /// <returns>ResponseDTO <seealso cref="StatisticOutput"/></returns>
-        [HttpPost]
-        public ActionResult<ResponseDTO<StatisticOutput>> GetStatistic([FromRoute] StatisticType type, [FromBody] StatisticInput input, [FromRoute] int? id)
+        [HttpPost(template: "{type}")]
+        public ActionResult<ResponseDTO<StatisticOutput>> GetStatistic([FromRoute] StatisticType type, [FromBody] StatisticInput input, [FromQuery] int? id)
         {
             StatisticOutput? result = type switch
             {

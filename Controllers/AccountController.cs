@@ -6,6 +6,7 @@ using System.Text;
 using CP.Api.Core.Models;
 using CP.Api.DTOs.Account;
 using CP.Api.DTOs.Response;
+using CP.Api.Models;
 using CP.Api.Services;
 
 using Microsoft.AspNetCore.Authorization;
@@ -124,14 +125,14 @@ namespace CP.Api.Controllers
         /// <summary>
         /// Update account information
         /// </summary>
-        /// <param name="id">Id of the account</param>
         /// <param name="updateProfileInput">Updated informations for the account</param>
         /// <returns>ResponseDTO <seealso cref="AccountOutput"/></returns>
         [Authorize]
         [HttpPut("{id}")]
-        public ActionResult<ResponseDTO<AccountOutput>> UpdateProfile(int id, UpdateProfileInput updateProfileInput)
+        public ActionResult<ResponseDTO<AccountOutput>> UpdateProfile(UpdateProfileInput updateProfileInput)
         {
-            AccountOutput? result = _accountService.UpdateProfile(id, updateProfileInput);
+            int userId = int.Parse(User.FindFirst("Id")!.Value);
+            AccountOutput? result = _accountService.UpdateProfile(userId, updateProfileInput);
             return result switch
             {
                 null => NotFound(new ResponseDTO<AccountOutput> { Message = "Account not found", Success = false }),
@@ -145,7 +146,7 @@ namespace CP.Api.Controllers
         /// <param name="id">Id of the account</param>
         /// <param name="ban">Ban status</param>
         /// <returns>ResponseDTO</returns>
-        [Authorize]
+        [Authorize(Roles = DefaultRoles.AdministratorString + "," + DefaultRoles.ManagerString)]
         [HttpPut("Ban/{id}")]
         public ActionResult<ResponseDTO> BanAccount(int id, bool ban)
         {
@@ -163,7 +164,7 @@ namespace CP.Api.Controllers
         /// <param name="id">Id of the account</param>
         /// <param name="disable">Visibility status</param>
         /// <returns>ResponseDTO</returns>
-        [Authorize]
+        [Authorize(Roles = DefaultRoles.AdministratorString + "," + DefaultRoles.ManagerString)]
         [HttpPut("Disable/{id}")]
         public ActionResult<ResponseDTO> DisableAccount(int id, bool disable)
         {

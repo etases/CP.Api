@@ -50,7 +50,7 @@ public class CommentService : ICommentService
         var c = _mapper.Map<Comment>(commentInput);
         c.AccountId = userId;
         var parentId = commentInput.ParentId;
-        if (parentId != null && GetComment(parentId.Value) == null) return null;
+        if (parentId.HasValue && GetComment(parentId.Value) == null) return null;
         _context.Comments.Add(c);
         _context.SaveChanges();
         var output = _mapper.Map<CommentOutput>(c);
@@ -99,7 +99,8 @@ public class CommentService : ICommentService
     {
         return _context.Comments
             .Include(c => c.Account)
-            .Include(c => c.Category);
+            .Include(c => c.Category)
+            .Include(c => c.Children);
     }
 }
 

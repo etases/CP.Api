@@ -13,6 +13,7 @@ public class CommentOutput
     public DateTime CreatedDate { get; set; } = DateTime.Now;
     public DateTime UpdatedDate { get; set; } = DateTime.Now;
     public bool IsDeleted { get; set; } = false;
+    public bool HasChild { get; set; } = false;
 
     public virtual AccountOutput Account { get; set; } = null!;
     public virtual CategoryOutput Category { get; set; } = null!;

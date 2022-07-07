@@ -86,14 +86,10 @@ namespace CP.Api.Controllers
         [HttpGet("{commentId}")]
         public ActionResult<ResponseDTO<int>> GetVoteCount(int commentId)
         {
-            DTOs.Comment.CommentOutput? comment = _commentService.GetComment(commentId);
-            if (comment == null)
-            {
-                return NotFound(new ResponseDTO { ErrorCode = 2, Message = "Comment Not Found" });
-            }
-
-            int result = _voteService.GetVoteCount(commentId);
-            return Ok(new ResponseDTO<int> { Success = true, Message = "Get vote count successfully", Data = result });
+            var result = _voteService.GetVoteCount(commentId);
+            return result.HasValue
+                ? Ok(new ResponseDTO<int> {Success = true, Message = "Get vote count successfully", Data = result.Value})
+                : NotFound(new ResponseDTO {ErrorCode = 1, Message = "Comment Not Found"});
         }
     }
 }

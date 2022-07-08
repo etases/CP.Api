@@ -132,8 +132,8 @@ namespace CP.Api.Controllers
         public ActionResult<ResponseDTO> DeleteComment(int id)
         {
             int userId = int.Parse(User.FindFirst("Id")!.Value);
-            bool isAdminRole = User.IsInRole(DefaultRoles.AdministratorString);
-            bool success = _commentService.DeleteComment(id, userId, isAdminRole);
+            bool bypassCheck = User.IsInRole(DefaultRoles.AdministratorString) || User.IsInRole(DefaultRoles.ManagerString);
+            bool success = _commentService.DeleteComment(id, userId, bypassCheck);
             return success switch
             {
                 true => Ok(new ResponseDTO { Success = true, Message = "Comment deleted" }),

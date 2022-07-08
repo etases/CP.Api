@@ -146,7 +146,7 @@ namespace CP.Api.Controllers
         /// <param name="id">Id of the account</param>
         /// <param name="ban">Ban status</param>
         /// <returns>ResponseDTO</returns>
-        [Authorize(Roles = DefaultRoles.AdministratorString + "," + DefaultRoles.ManagerString)]
+        [Authorize(Roles = DefaultRoles.AdministratorString)]
         [HttpPut("Ban/{id}")]
         public ActionResult<ResponseDTO> BanAccount(int id, bool ban)
         {
@@ -164,7 +164,7 @@ namespace CP.Api.Controllers
         /// <param name="id">Id of the account</param>
         /// <param name="disable">Visibility status</param>
         /// <returns>ResponseDTO</returns>
-        [Authorize(Roles = DefaultRoles.AdministratorString + "," + DefaultRoles.ManagerString)]
+        [Authorize(Roles = DefaultRoles.AdministratorString)]
         [HttpPut("Disable/{id}")]
         public ActionResult<ResponseDTO> DisableAccount(int id, bool disable)
         {

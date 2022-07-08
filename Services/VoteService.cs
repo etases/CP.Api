@@ -12,11 +12,13 @@ public class VoteService : IVoteService
 {
     private readonly ApplicationDbContext _context;
     private readonly IMapper _mapper;
+    private readonly IUpdateHubService _updateHubService;
 
-    public VoteService(ApplicationDbContext context, IMapper mapper)
+    public VoteService(ApplicationDbContext context, IMapper mapper, IUpdateHubService updateHubService)
     {
         _context = context;
         _mapper = mapper;
+        _updateHubService = updateHubService;
     }
 
     //check if user has voted the commend
@@ -52,6 +54,7 @@ public class VoteService : IVoteService
         }
 
         _context.SaveChanges();
+        _updateHubService.NotifyVoteCountUpdate(voteDTO.CommentId);
     }
 
     //get vote count

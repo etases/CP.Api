@@ -12,27 +12,27 @@ public static class ProductServices
             > 0 => s_services,
             _ => s_services = new List<ServiceDescriptor>
             {
-                new ServiceDescriptor(
+                new(
                     typeof(IAccountService),
                     typeof(AccountService),
                     ServiceLifetime.Scoped
                 ),
-                new ServiceDescriptor(
+                new(
                     typeof(IVoteService),
                     typeof(VoteService),
                     ServiceLifetime.Scoped
                 ),
-                new ServiceDescriptor(
+                new(
                     typeof(ICategoryService),
                     typeof(CategoryService),
                     ServiceLifetime.Scoped
                 ),
-                new ServiceDescriptor(
+                new(
                     typeof(ICommentService),
                     typeof(CommentService),
                     ServiceLifetime.Scoped
                 ),
-                new ServiceDescriptor(
+                new(
                     typeof(IStatisticService),
                     typeof(StatisticService),
                     ServiceLifetime.Scoped

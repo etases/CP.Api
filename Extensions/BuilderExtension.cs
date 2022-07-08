@@ -5,6 +5,7 @@ using System.Text.Json;
 using CP.Api.Context;
 using CP.Api.Core.Models;
 using CP.Api.Core.Resources.Static;
+using CP.Api.Services;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -88,7 +89,7 @@ public static class BuilderExtension
                 {
                     string connectionUrl = Environment.GetEnvironmentVariable("DATABASE_URL")!;
 
-                    Uri databaseUri = new Uri(connectionUrl!);
+                    Uri databaseUri = new(connectionUrl!);
 
                     string databaseName = databaseUri
                         .LocalPath
@@ -168,6 +169,13 @@ public static class BuilderExtension
         this IServiceCollection services
     )
     {
+        services.AddSingleton<IUpdateHubService>(provider =>
+        {
+            IConfiguration configuration = provider.GetRequiredService<IConfiguration>();
+            string? updateHubUrl = configuration.GetConnectionString("UpdateHub");
+            return new UpdateHubService(updateHubUrl);
+        });
+
         services.AddAutoMapper(Profiles.Profiles.AddProfile);
 
         services.AddSwaggerGen

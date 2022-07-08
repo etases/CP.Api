@@ -21,52 +21,63 @@ public class CommentService : ICommentService
 
     public CommentOutput? GetComment(int id)
     {
-        var comment = GetComments().SingleOrDefault(c => c.Id == id);
+        Comment? comment = GetComments().SingleOrDefault(c => c.Id == id);
         if (comment == null)
+        {
             return null;
+        }
 
-        var output = _mapper.Map<CommentOutput>(comment);
+        CommentOutput? output = _mapper.Map<CommentOutput>(comment);
         return output;
     }
 
     public ICollection<CommentOutput> GetCommentByCategory(int id, bool includeChild)
     {
-        var comment = GetComments().Where(c => c.CategoryId == id);
+        IQueryable<Comment> comment = GetComments().Where(c => c.CategoryId == id);
         if (!includeChild)
         {
             comment = comment.Where(c => c.ParentId == null);
         }
+
         return _mapper.Map<ICollection<CommentOutput>>(comment.ToList());
     }
 
     public ICollection<CommentOutput> GetCommentByParent(int id)
     {
-        var comment = GetComments().Where(c => c.ParentId == id).ToList();
+        List<Comment> comment = GetComments().Where(c => c.ParentId == id).ToList();
         return _mapper.Map<ICollection<CommentOutput>>(comment);
     }
 
     public CommentOutput? AddComment(int userId, CommentInput commentInput)
     {
-        var c = _mapper.Map<Comment>(commentInput);
+        Comment? c = _mapper.Map<Comment>(commentInput);
         c.AccountId = userId;
-        var parentId = commentInput.ParentId;
-        if (parentId.HasValue && GetComment(parentId.Value) == null) return null;
+        int? parentId = commentInput.ParentId;
+        if (parentId.HasValue && GetComment(parentId.Value) == null)
+        {
+            return null;
+        }
+
         _context.Comments.Add(c);
         _context.SaveChanges();
-        var output = _mapper.Map<CommentOutput>(c);
+        CommentOutput? output = _mapper.Map<CommentOutput>(c);
         return output;
     }
 
     public CommentOutput? UpdateComment(int id, CommentUpdate commentUpdate, int userId, bool bypassCheck)
     {
-        var c = GetComments().SingleOrDefault(c => c.Id == id && c.IsDeleted == false);
+        Comment? c = GetComments().SingleOrDefault(c => c.Id == id && c.IsDeleted == false);
         if (c == null)
+        {
             return null;
+        }
 
         if (!bypassCheck)
         {
             if (c.AccountId != userId)
+            {
                 return null;
+            }
         }
 
         _mapper.Map(commentUpdate, c);
@@ -79,14 +90,18 @@ public class CommentService : ICommentService
 
     public bool DeleteComment(int id, int userId, bool bypassCheck)
     {
-        var comment = GetComments().SingleOrDefault(c => c.Id == id && c.IsDeleted == false);
+        Comment? comment = GetComments().SingleOrDefault(c => c.Id == id && c.IsDeleted == false);
         if (comment == null)
+        {
             return false;
-        
+        }
+
         if (!bypassCheck)
         {
             if (comment.AccountId != userId)
+            {
                 return false;
+            }
         }
 
         comment.IsDeleted = true;

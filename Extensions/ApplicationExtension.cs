@@ -27,7 +27,7 @@ public static class ApplicationExtension
         return app;
     }
 
-    static WebApplication AddBuiltInService
+    private static WebApplication AddBuiltInService
     (
         this WebApplication app
     )
@@ -41,31 +41,26 @@ public static class ApplicationExtension
 
         app.UseCors
         (
-            configurePolicy: policyBuilder =>
+            policyBuilder =>
             {
                 policyBuilder
                     .WithOrigins
                     (
-                        origins: new[]
-                        {
-                            "http://localhost:*",
-                            "https://*.herokuapp.com"
-                        }
+                        new[] {"http://localhost:*", "https://*.herokuapp.com"}
                     )
                     .SetIsOriginAllowedToAllowWildcardSubdomains()
                     .AllowCredentials()
                     .AllowAnyHeader()
                     .WithMethods
                     (
-                        methods: new[]
-                        { "GET", "POST", "PUT", "PATCH", "DELETE" }
+                        new[] {"GET", "POST", "PUT", "PATCH", "DELETE"}
                     );
             }
         );
         return app;
     }
 
-    static WebApplication AddThirPartyService
+    private static WebApplication AddThirPartyService
     (
         this WebApplication app
     )
@@ -73,7 +68,7 @@ public static class ApplicationExtension
         app.UseSwagger();
         app.UseSwaggerUI
         (
-            setupAction: options =>
+            options =>
             {
                 options.SwaggerEndpoint("/swagger/v1/swagger.json", "PRN231 API");
                 options.RoutePrefix = string.Empty;

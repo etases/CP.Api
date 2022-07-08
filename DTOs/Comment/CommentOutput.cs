@@ -8,8 +8,8 @@ public class CommentOutput
     public string Content { get; set; } = null!;
     public string Keyword { get; set; } = string.Empty;
     public int? ParentId { get; set; } = null;
-    public int CategoryId { get; set; } 
-    public int AccountId { get; set; } 
+    public int CategoryId { get; set; }
+    public int AccountId { get; set; }
     public DateTime CreatedDate { get; set; } = DateTime.Now;
     public DateTime UpdatedDate { get; set; } = DateTime.Now;
     public bool IsDeleted { get; set; } = false;

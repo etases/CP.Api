@@ -40,27 +40,28 @@ public static class BuilderExtension
         services
             .AddAuthentication
             (
-                defaultScheme: JwtBearerDefaults.AuthenticationScheme
+                JwtBearerDefaults.AuthenticationScheme
             )
             .AddJwtBearer
             (
-                configureOptions: options =>
+                options =>
                 {
-                    var jwtConf = configurations
-                        .GetSection(key: "Jwt")
+                    JWTModel? jwtConf = configurations
+                        .GetSection("Jwt")
                         .Get<JWTModel>();
 
                     options.RequireHttpsMetadata = false;
 
                     options.SaveToken = true;
 
-                    options.TokenValidationParameters = new TokenValidationParameters()
+                    options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuer = true, // Validate the issuer
                         ValidateAudience = true, // Validate the audience
                         ValidAudience = jwtConf.Audience, // The valid audience
                         ValidIssuer = jwtConf.Issuer, // The valid issuer
-                        IssuerSigningKey = new SymmetricSecurityKey(key: Encoding.UTF8.GetBytes(s: jwtConf.Key)) // The key to sign the token
+                        IssuerSigningKey =
+                            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConf.Key)) // The key to sign the token
                     };
                 }
             );
@@ -76,41 +77,41 @@ public static class BuilderExtension
     {
         services.AddDbContextPool<ApplicationDbContext>
         (
-            optionsAction: optionsBuilder =>
+            optionsBuilder =>
             {
                 if (environments.IsDevelopment())
                 {
-                    optionsBuilder.UseNpgsql(connectionString: configurations.GetConnectionString(name: "DefaultConnection"));
+                    optionsBuilder.UseNpgsql(configurations.GetConnectionString("DefaultConnection"));
                 }
+
                 if (!environments.IsDevelopment())
                 {
-                    var connectionUrl = Environment.GetEnvironmentVariable(variable: "DATABASE_URL")!;
+                    string connectionUrl = Environment.GetEnvironmentVariable("DATABASE_URL")!;
 
-                    var databaseUri = new Uri(uriString: connectionUrl!);
+                    Uri databaseUri = new Uri(connectionUrl!);
 
-                    var databaseName = databaseUri
+                    string databaseName = databaseUri
                         .LocalPath
-                        .TrimStart(trimChar: '/');
+                        .TrimStart('/');
 
-                    var userInfo = databaseUri
+                    string[] userInfo = databaseUri
                         .UserInfo
                         .Split
                         (
-                            separator: ':',
-                            options: StringSplitOptions.RemoveEmptyEntries
+                            ':',
+                            StringSplitOptions.RemoveEmptyEntries
                         );
 
                     optionsBuilder.UseNpgsql
                     (
-                        connectionString:
-                            $"User ID={userInfo[0]};" +
-                            $"Password={userInfo[1]};" +
-                            $"Host={databaseUri.Host};" +
-                            $"Port={databaseUri.Port};" +
-                            $"Database={databaseName};" +
-                            $"Pooling=true;" +
-                            $"SSL Mode=Require;" +
-                            $"Trust Server Certificate=True;"
+                        $"User ID={userInfo[0]};" +
+                        $"Password={userInfo[1]};" +
+                        $"Host={databaseUri.Host};" +
+                        $"Port={databaseUri.Port};" +
+                        $"Database={databaseName};" +
+                        "Pooling=true;" +
+                        "SSL Mode=Require;" +
+                        "Trust Server Certificate=True;"
                     );
                 }
             }
@@ -118,7 +119,7 @@ public static class BuilderExtension
         return services;
     }
 
-    static IServiceCollection AddBuiltInServices
+    private static IServiceCollection AddBuiltInServices
     (
         this IServiceCollection services
     )
@@ -127,7 +128,7 @@ public static class BuilderExtension
             .AddControllers()
             .AddJsonOptions
             (
-                configure: options =>
+                options =>
                 {
                     options.JsonSerializerOptions.AllowTrailingCommas = true;
                     options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
@@ -137,71 +138,72 @@ public static class BuilderExtension
             )
             .ConfigureApiBehaviorOptions
             (
-                setupAction: options =>
-                { }
+                options =>
+                {
+                }
             );
 
         services.AddEndpointsApiExplorer();
 
         services.AddCors
         (
-            setupAction: options =>
-            { }
+            options =>
+            {
+            }
         );
         return services;
     }
 
-    static IServiceCollection AddProductServices
+    private static IServiceCollection AddProductServices
     (
         this IServiceCollection services
     )
     {
-        services.TryAdd(descriptors: ProductServices.Services);
+        services.TryAdd(ProductServices.Services);
         return services;
     }
 
-    static IServiceCollection AddThirdPartyServices
+    private static IServiceCollection AddThirdPartyServices
     (
         this IServiceCollection services
     )
     {
-        services.AddAutoMapper(configAction: Profiles.Profiles.AddProfile);
+        services.AddAutoMapper(Profiles.Profiles.AddProfile);
 
         services.AddSwaggerGen
         (
-            setupAction: options =>
+            options =>
             {
                 // Set the comments path for the Swagger JSON and UI.
-                var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                options.IncludeXmlComments(filePath: Path.Combine(path1: AppContext.BaseDirectory, path2: xmlFilename));
+                string xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 
                 // Bearer token authentication
                 options.AddSecurityDefinition
                 (
-                    name: "Bearer",
-                    securityScheme: new OpenApiSecurityScheme
+                    "Bearer",
+                    new OpenApiSecurityScheme
                     {
                         Name = "Authorization",
                         BearerFormat = "JWT",
                         Scheme = "bearer",
                         Description = "Specify the authorization token.",
                         In = ParameterLocation.Header,
-                        Type = SecuritySchemeType.Http,
+                        Type = SecuritySchemeType.Http
                     }
                 );
 
                 // Make sure swagger UI requires a Bearer token specified
                 options.AddSecurityRequirement
                 (
-                    securityRequirement: new OpenApiSecurityRequirement
+                    new OpenApiSecurityRequirement
                     {
                         {
                             new OpenApiSecurityScheme
                             {
                                 Reference = new OpenApiReference
                                 {
-                                    Type = ReferenceType.SecurityScheme,
-                                    Id = "Bearer"
+                                    Type = ReferenceType.SecurityScheme, Id = "Bearer"
                                 }
                             },
                             Array.Empty<string>()

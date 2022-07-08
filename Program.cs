@@ -2,21 +2,22 @@ using CP.Api.Extensions;
 
 #region builder
 
-var builder = WebApplication.CreateBuilder(args);
-var builderEnv = builder.Environment;
-var builderConf = builder.Configuration;
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+IWebHostEnvironment builderEnv = builder.Environment;
+ConfigurationManager builderConf = builder.Configuration;
 
 // Add services to the container.
 builder.Services.RegisterCommonServices();
 
-builder.Services.RegisterAuthService(configurations: builderConf);
+builder.Services.RegisterAuthService(builderConf);
 
-builder.Services.RegisterDbContextService(environments: builderEnv, configurations: builderConf);
+builder.Services.RegisterDbContextService(builderEnv, builderConf);
 
 #endregion
 
 #region app
-var app = builder.Build();
+
+WebApplication app = builder.Build();
 
 app.RegisterCommonServices();
 

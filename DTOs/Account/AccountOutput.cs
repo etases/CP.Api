@@ -5,7 +5,7 @@ namespace CP.Api.DTOs.Account;
 public class AccountOutput
 {
     public int Id { get; set; }
-    public string Username { get; set; } = null!; 
+    public string Username { get; set; } = null!;
     public int RoleId { get; set; }
     public bool IsDisabled { get; set; } = false;
     public bool IsBanned { get; set; } = false;

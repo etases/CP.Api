@@ -2,38 +2,37 @@
 
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 
-namespace CP.Api.Services
+namespace CP.Api.Services;
+
+public static class Hasher
 {
-    public static class Hasher
+    // See: https://docs.microsoft.com/en-us/aspnet/core/security/data-protection/consumer-apis/password-hashing?view=aspnetcore-2.2
+
+    public static string GenerateSalt()
     {
-        // See: https://docs.microsoft.com/en-us/aspnet/core/security/data-protection/consumer-apis/password-hashing?view=aspnetcore-2.2
+        // generate a 128-bit salt using a secure PRNG
+        byte[] salt = new byte[128 / 8];
 
-        public static string GenerateSalt()
+        using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
         {
-            // generate a 128-bit salt using a secure PRNG
-            byte[] salt = new byte[128 / 8];
-
-            using (var rng = RandomNumberGenerator.Create())
-            {
-                rng.GetBytes(salt);
-            }
-
-            return Convert.ToBase64String(salt);
+            rng.GetBytes(salt);
         }
 
-        public static string HashPassword(string strSalt, string password)
-        {
-            byte[] salt = Convert.FromBase64String(strSalt);
+        return Convert.ToBase64String(salt);
+    }
 
-            // derive a 256-bit subkey (use HMACSHA1 with 10,000 iterations)
-            string hashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(
-                password: password,
-                salt: salt,
-                prf: KeyDerivationPrf.HMACSHA1,
-                iterationCount: 10000,
-                numBytesRequested: 256 / 8));
+    public static string HashPassword(string strSalt, string password)
+    {
+        byte[] salt = Convert.FromBase64String(strSalt);
 
-            return hashed;
-        }
+        // derive a 256-bit subkey (use HMACSHA1 with 10,000 iterations)
+        string hashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+            password,
+            salt,
+            KeyDerivationPrf.HMACSHA1,
+            10000,
+            256 / 8));
+
+        return hashed;
     }
 }

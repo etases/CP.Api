@@ -22,7 +22,7 @@ public class VoteService : IVoteService
     //check if user has voted the commend
     public bool HasVoted(int accountId, int commentId)
     {
-        var vote = _context.Votes.SingleOrDefault(v => v.AccountId == accountId && v.CommentId == commentId);
+        Vote? vote = _context.Votes.SingleOrDefault(v => v.AccountId == accountId && v.CommentId == commentId);
         return vote != null;
     }
 
@@ -30,7 +30,8 @@ public class VoteService : IVoteService
     //implement vote action
     public void HandleVote(VoteDTO voteDTO)
     {
-        var vote = _context.Votes.SingleOrDefault(v => v.AccountId == voteDTO.AccountId && v.CommentId == voteDTO.CommentId);
+        Vote? vote =
+            _context.Votes.SingleOrDefault(v => v.AccountId == voteDTO.AccountId && v.CommentId == voteDTO.CommentId);
 
         if (vote != null)
         {
@@ -49,19 +50,22 @@ public class VoteService : IVoteService
             vote = _mapper.Map<Vote>(voteDTO);
             _context.Votes.Add(vote);
         }
+
         _context.SaveChanges();
     }
 
     //get vote count
     public int? GetVoteCount(int commentId)
     {
-        var votes = _context.Comments.Include(c => c.Votes).SingleOrDefault(c => c.Id == commentId)?.Votes;
+        ICollection<Vote>? votes = _context.Comments.Include(c => c.Votes).SingleOrDefault(c => c.Id == commentId)
+            ?.Votes;
         if (votes == null)
         {
             return null;
         }
-        var upVote = votes.Count(v => v.IsUpvote);
-        var downVote = votes.Count(v => !v.IsUpvote);
+
+        int upVote = votes.Count(v => v.IsUpvote);
+        int downVote = votes.Count(v => !v.IsUpvote);
 
         return upVote - downVote;
     }

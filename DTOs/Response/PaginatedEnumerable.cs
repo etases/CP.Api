@@ -1,6 +1,6 @@
 ﻿namespace CP.Api.DTOs.Response;
 
-public class PaginationResponseDTO<T> : ResponseDTO<IEnumerable<T>>
+public class PaginatedEnumerable<T>
 {
     public int TotalRecord { get; set; }
     public int TotalPage { get; set; }
@@ -8,4 +8,5 @@ public class PaginationResponseDTO<T> : ResponseDTO<IEnumerable<T>>
     public int PageNumber { get; set; }
     public bool HasNextPage { get; set; }
     public bool HasPreviousPage { get; set; }
+    public IEnumerable<T> Items { get; init; } = null!;
 }

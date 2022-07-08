@@ -20,38 +20,39 @@ public class CategoryService : ICategoryService
     //get all categories
     public ICollection<CategoryOutput> GetAllCategories()
     {
-        var categories = _dbContext.Categories.ToList();
-        var output = _mapper.Map<ICollection<CategoryOutput>>(categories);
+        List<Category> categories = _dbContext.Categories.ToList();
+        ICollection<CategoryOutput>? output = _mapper.Map<ICollection<CategoryOutput>>(categories);
         return output;
     }
 
     //get category by id
     public CategoryOutput? GetCategoryById(int id)
     {
-        var category = _dbContext.Categories.FirstOrDefault(c => c.Id == id);
+        Category? category = _dbContext.Categories.FirstOrDefault(c => c.Id == id);
         if (category == null)
         {
             return null;
         }
-        var output = _mapper.Map<CategoryOutput>(category);
+
+        CategoryOutput? output = _mapper.Map<CategoryOutput>(category);
         return output;
     }
 
     //create category
     public CategoryOutput? CreateCategory(CategoryInput categoryInput)
     {
-        var existCategory = _dbContext.Categories.FirstOrDefault(x => x.Name == categoryInput.Name);
+        Category? existCategory = _dbContext.Categories.FirstOrDefault(x => x.Name == categoryInput.Name);
         if (existCategory != null)
         {
             return null;
         }
+
         existCategory = _mapper.Map<Category>(categoryInput);
         _dbContext.Categories.Add(existCategory);
         _dbContext.SaveChanges();
-        var output = _mapper.Map<CategoryOutput>(existCategory);
+        CategoryOutput? output = _mapper.Map<CategoryOutput>(existCategory);
         return output;
     }
-
 }
 
 public interface ICategoryService

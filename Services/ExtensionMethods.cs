@@ -79,7 +79,7 @@ public static class ExtensionMethods
     public static string RemovePunctuation(this string s)
     {
         char[] chars = s.Where(c => !Char.IsPunctuation(c)).ToArray();
-        string str = new string(chars);
+        string str = new(chars);
 
         return str;
     }
@@ -245,7 +245,7 @@ public static class ExtensionMethods
 
     public static T SerializeTo<T>(this IDictionary<string, object> fieldValues) where T : new()
     {
-        T rec = new T();
+        T rec = new();
         Type t = rec.GetType();
 
         fieldValues.ForEach(kvp =>

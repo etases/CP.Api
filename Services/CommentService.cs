@@ -12,11 +12,13 @@ public class CommentService : ICommentService
 {
     private readonly ApplicationDbContext _context;
     private readonly IMapper _mapper;
+    private readonly IUpdateHubService _updateHubService;
 
-    public CommentService(ApplicationDbContext context, IMapper mapper)
+    public CommentService(ApplicationDbContext context, IMapper mapper, IUpdateHubService updateHubService)
     {
         _context = context;
         _mapper = mapper;
+        _updateHubService = updateHubService;
     }
 
     public CommentOutput? GetComment(int id)
@@ -60,6 +62,16 @@ public class CommentService : ICommentService
 
         _context.Comments.Add(c);
         _context.SaveChanges();
+
+        if (parentId.HasValue)
+        {
+            _updateHubService.NotifyCommentUpdate(parentId.Value);
+        }
+        else
+        {
+            _updateHubService.NotifyCategoryUpdate(c.CategoryId);
+        }
+
         CommentOutput? output = _mapper.Map<CommentOutput>(c);
         return output;
     }
@@ -84,6 +96,12 @@ public class CommentService : ICommentService
         _context.Comments.Update(c);
         _context.SaveChanges();
 
+        _updateHubService.NotifyCommentUpdate(c.Id);
+        if (!c.ParentId.HasValue)
+        {
+            _updateHubService.NotifyCategoryUpdate(c.CategoryId);
+        }
+
         CommentOutput output = _mapper.Map<CommentOutput>(c);
         return output;
     }
@@ -107,6 +125,13 @@ public class CommentService : ICommentService
         comment.IsDeleted = true;
         _context.Comments.Update(comment);
         _context.SaveChanges();
+
+        _updateHubService.NotifyCommentUpdate(comment.Id);
+        if (!comment.ParentId.HasValue)
+        {
+            _updateHubService.NotifyCategoryUpdate(comment.CategoryId);
+        }
+
         return true;
     }
 

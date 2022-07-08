@@ -45,16 +45,12 @@ public static class ApplicationExtension
             {
                 policyBuilder
                     .WithOrigins
-                    (
-                        new[] {"http://localhost:*", "https://*.herokuapp.com"}
-                    )
+                        ("http://localhost:*", "https://*.herokuapp.com")
                     .SetIsOriginAllowedToAllowWildcardSubdomains()
                     .AllowCredentials()
                     .AllowAnyHeader()
                     .WithMethods
-                    (
-                        new[] {"GET", "POST", "PUT", "PATCH", "DELETE"}
-                    );
+                        ("GET", "POST", "PUT", "PATCH", "DELETE");
             }
         );
         return app;

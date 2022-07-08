@@ -1,6 +1,7 @@
 using CP.Api.DTOs.Comment;
 using CP.Api.DTOs.Response;
 using CP.Api.Extensions;
+using CP.Api.Models;
 using CP.Api.Services;
 
 using Microsoft.AspNetCore.Authorization;
@@ -111,7 +112,9 @@ namespace CP.Api.Controllers
         [Authorize]
         public ActionResult<ResponseDTO<CommentOutput>> UpdateComment(int id, CommentUpdate comment)
         {
-            CommentOutput? c = _commentService.UpdateComment(id, comment);
+            int userId = int.Parse(User.FindFirst("Id")!.Value);
+            bool isAdminRole = User.IsInRole(DefaultRoles.AdministratorString);
+            CommentOutput? c = _commentService.UpdateComment(id, comment, userId, isAdminRole);
             return c switch
             {
                 null => NotFound(new ResponseDTO<CommentOutput> { Message = "Comment not found", Success = false }),
@@ -128,7 +131,9 @@ namespace CP.Api.Controllers
         [Authorize]
         public ActionResult<ResponseDTO> DeleteComment(int id)
         {
-            bool success = _commentService.DeleteComment(id);
+            int userId = int.Parse(User.FindFirst("Id")!.Value);
+            bool isAdminRole = User.IsInRole(DefaultRoles.AdministratorString);
+            bool success = _commentService.DeleteComment(id, userId, isAdminRole);
             return success switch
             {
                 true => Ok(new ResponseDTO { Success = true, Message = "Comment deleted" }),

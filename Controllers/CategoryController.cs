@@ -1,8 +1,10 @@
 using CP.Api.DTOs;
 using CP.Api.DTOs.Response;
 using CP.Api.Extensions;
+using CP.Api.Models;
 using CP.Api.Services;
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CP.Api.Controllers
@@ -62,6 +64,7 @@ namespace CP.Api.Controllers
         /// <param name="categoryInput">Information to create category</param>
         /// <returns>ResponseDTO <seealso cref="CategoryOutput"/></returns>
         [HttpPost]
+        [Authorize(Roles = DefaultRoles.AdministratorString)]
         public ActionResult<ResponseDTO<CategoryOutput>> CreateCategory(CategoryInput categoryInput)
         {
             CategoryOutput? category = _categoryService.CreateCategory(categoryInput);

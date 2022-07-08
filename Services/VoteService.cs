@@ -4,6 +4,8 @@ using CP.Api.Context;
 using CP.Api.DTOs.Vote;
 using CP.Api.Models;
 
+using Microsoft.EntityFrameworkCore;
+
 namespace CP.Api.Services;
 
 public class VoteService : IVoteService
@@ -51,9 +53,13 @@ public class VoteService : IVoteService
     }
 
     //get vote count
-    public int GetVoteCount(int commentId)
+    public int? GetVoteCount(int commentId)
     {
-        var votes = _context.Votes.Where(v => v.CommentId == commentId);
+        var votes = _context.Comments.Include(c => c.Votes).SingleOrDefault(c => c.Id == commentId)?.Votes;
+        if (votes == null)
+        {
+            return null;
+        }
         var upVote = votes.Count(v => v.IsUpvote);
         var downVote = votes.Count(v => !v.IsUpvote);
 
@@ -65,5 +71,5 @@ public interface IVoteService
 {
     void HandleVote(VoteDTO voteDTO);
     bool HasVoted(int accountId, int commentId);
-    int GetVoteCount(int commentId);
+    int? GetVoteCount(int commentId);
 }

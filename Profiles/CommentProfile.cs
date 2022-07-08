@@ -12,9 +12,13 @@ public class CommentProfile : Profile
         CreateMap<Comment, CommentOutput>()
             .AfterMap((src, des) =>
             {
-                if (!src.IsDeleted) return;
-                des.Content = string.Empty;
-                des.Keyword = string.Empty;
+                if (src.IsDeleted)
+                {
+                    des.Content = string.Empty;
+                    des.Keyword = string.Empty;
+                }
+
+                des.HasChild = src.Children != null && !src.Children.Any();
             });
         CreateMap<CommentInput, Comment>();
         CreateMap<CommentUpdate, Comment>();

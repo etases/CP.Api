@@ -48,6 +48,7 @@ public class AccountService : IAccountService
         Account? account = _mapper.Map<Account>(input);
         account.SaltedPassword = Hasher.GenerateSalt();
         account.HashedPassword = Hasher.HashPassword(account.SaltedPassword, input.Password);
+        account.RoleId = DefaultRoles.User.Id;
         _context.Accounts.Add(account);
         _context.SaveChanges();
 

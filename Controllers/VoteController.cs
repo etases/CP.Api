@@ -82,7 +82,7 @@ public class VoteController : ControllerBase
     /// </summary>
     /// <param name="commentId">Id of the comment</param>
     /// <returns>ResponseDTO</returns>
-    [HttpGet("{commentId}")]
+    [HttpGet("count/{commentId}")]
     public ActionResult<ResponseDTO<int>> GetVoteCount(int commentId)
     {
         int? result = _voteService.GetVoteCount(commentId);

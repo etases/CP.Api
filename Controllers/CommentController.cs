@@ -72,6 +72,33 @@ public class CommentController : ControllerBase
             HasPreviousPage = pagedOutput.HasPreviousPage
         };
     }
+    
+    /// <summary>
+    ///     Get topic by keyword
+    /// </summary>
+    /// <remarks>
+    ///     FIXME: Rename endpoint for better readability
+    /// </remarks>
+    /// <param name="keyword">The Keyword</param>
+    /// <param name="parameter">Pagination parameter</param>
+    /// <returns>PaginationResponseDTO <seealso cref="CommentOutput" /></returns>
+    [HttpGet("Keyword")]
+    public PaginationResponseDTO<CommentOutput> GetByKeyword([FromQuery] string keyword, [FromQuery] PaginationParameter parameter)
+    {
+        PaginatedEnumerable<CommentOutput> pagedOutput = _commentService.GetCommentByKeyword(keyword).GetPage(parameter);
+        return new PaginationResponseDTO<CommentOutput>
+        {
+            Data = pagedOutput.Items,
+            Success = true,
+            Message = "Get comments successfully",
+            TotalRecord = pagedOutput.TotalRecord,
+            TotalPage = pagedOutput.TotalPage,
+            PageNumber = pagedOutput.PageNumber,
+            PageSize = pagedOutput.PageSize,
+            HasNextPage = pagedOutput.HasNextPage,
+            HasPreviousPage = pagedOutput.HasPreviousPage
+        };
+    }
 
     /// <summary>
     ///     Get comment by parent comment id

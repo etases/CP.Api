@@ -17,14 +17,17 @@ namespace CP.Api.Controllers;
 public class CommentController : ControllerBase
 {
     private readonly ICommentService _commentService;
+    private readonly ICategoryService _categoryService;
 
     /// <summary>
     ///     Comment controller constructor
     /// </summary>
     /// <param name="commentService">Comment service</param>
-    public CommentController(ICommentService commentService)
+    /// <param name="categoryService">Category Service</param>
+    public CommentController(ICommentService commentService, ICategoryService categoryService)
     {
         _commentService = commentService;
+        _categoryService = categoryService;
     }
 
     /// <summary>
@@ -97,11 +100,16 @@ public class CommentController : ControllerBase
     [Authorize]
     public ActionResult<ResponseDTO<CommentOutput>> AddComment(CommentInput comment)
     {
+        if (_categoryService.GetCategoryById(comment.CategoryId) == null)
+        {
+            return BadRequest(new ResponseDTO<CommentOutput> {Message = "Category not found", ErrorCode = 1});
+        }
+        
         int userId = int.Parse(User.FindFirst("Id")!.Value);
         CommentOutput? c = _commentService.AddComment(userId, comment);
         return c switch
         {
-            null => NotFound(new ResponseDTO<CommentOutput> {Message = "Comment add failed", Success = false}),
+            null => BadRequest(new ResponseDTO<CommentOutput> {Message = "Comment add failed", ErrorCode = 2}),
             _ => Ok(new ResponseDTO<CommentOutput> {Data = c, Success = true, Message = "Comment added"})
         };
     }

@@ -55,9 +55,11 @@ public class CommentService : ICommentService
         Comment? c = _mapper.Map<Comment>(commentInput);
         c.AccountId = userId;
         int? parentId = commentInput.ParentId;
-        if (parentId.HasValue && GetComment(parentId.Value) == null)
+        if (parentId.HasValue)
         {
-            return null;
+            var parent = GetComment(parentId.Value);
+            if (parent == null) return null;
+            commentInput.CategoryId = parent.CategoryId;
         }
 
         _context.Comments.Add(c);

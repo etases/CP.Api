@@ -42,16 +42,13 @@ public static class ApplicationExtension
         app.UseCors
         (
             policyBuilder =>
-            {
                 policyBuilder
                     .WithOrigins
-                        ("http://localhost:*", "https://*.herokuapp.com")
-                    .SetIsOriginAllowedToAllowWildcardSubdomains()
+                        ("http://localhost:3000", "https://localhost:3000")
                     .AllowCredentials()
                     .AllowAnyHeader()
                     .WithMethods
-                        ("GET", "POST", "PUT", "PATCH", "DELETE");
-            }
+                        ("GET", "POST", "PUT", "PATCH", "DELETE")
         );
         return app;
     }

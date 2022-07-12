@@ -53,7 +53,7 @@ public class CommentController : ControllerBase
     /// <param name="parameter">Pagination parameter</param>
     /// <returns>PaginationResponseDTO <seealso cref="CommentOutput" /></returns>
     [HttpGet("Category/{id}")]
-    public PaginationResponseDTO<CommentOutput> GetByCategory([FromQuery] int id, [FromQuery] PaginationParameter parameter)
+    public PaginationResponseDTO<CommentOutput> GetByCategory(int id, [FromQuery] PaginationParameter parameter)
     {
         PaginatedEnumerable<CommentOutput> pagedOutput = _commentService.GetCommentByCategory(id).GetPage(parameter);
         return new PaginationResponseDTO<CommentOutput>

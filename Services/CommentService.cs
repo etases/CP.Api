@@ -57,10 +57,24 @@ public class CommentService : ICommentService
         {
             comment = comment.Where(c => c.ParentId == null);
         }
-        var commentList = comment.ToList();
-        var keywordArray = keyword.Split(',');
-        commentList = commentList.Where(c => keywordArray.All(k => c.Keyword.ToLower().Contains(k))).ToList();
+
+        List<Comment> commentList = comment.ToList();
+        if (!string.IsNullOrEmpty(keyword))
+        {
+            IEnumerable<string> keywordArray = keyword.Split(',').Select(k => k.Trim().ToLower());
+            commentList = commentList.Where(c => keywordArray.All(k => c.Keyword.ToLower().Contains(k))).ToList();
+        }
+
         return _mapper.Map<ICollection<CommentOutput>>(commentList);
+    }
+
+    public ICollection<string> GetKeywords(string keyword)
+    {
+        return GetCommentByKeyword(keyword, false)
+            .SelectMany(c => c.Keyword.Split(','))
+            .Select(c => c.Trim())
+            .Distinct()
+            .ToList();
     }
 
     public CommentOutput? AddComment(int userId, CommentInput commentInput)
@@ -70,8 +84,12 @@ public class CommentService : ICommentService
         int? parentId = commentInput.ParentId;
         if (parentId.HasValue)
         {
-            var parent = GetComment(parentId.Value);
-            if (parent == null) return null;
+            CommentOutput? parent = GetComment(parentId.Value);
+            if (parent == null)
+            {
+                return null;
+            }
+
             commentInput.CategoryId = parent.CategoryId;
         }
 
@@ -165,6 +183,7 @@ public interface ICommentService
     ICollection<CommentOutput> GetCommentByCategory(int cateId, bool includeChild = false);
     ICollection<CommentOutput> GetCommentByParent(int parentId);
     ICollection<CommentOutput> GetCommentByKeyword(string keyword, bool includeChild = false);
+    ICollection<string> GetKeywords(string keyword);
     CommentOutput? AddComment(int userId, CommentInput commentInput);
     CommentOutput? UpdateComment(int commentId, CommentUpdate commentUpdate, int userId, bool bypassCheck);
     bool DeleteComment(int commentId, int userId, bool bypassCheck);

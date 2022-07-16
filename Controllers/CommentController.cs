@@ -16,8 +16,8 @@ namespace CP.Api.Controllers;
 [Route("[controller]")]
 public class CommentController : ControllerBase
 {
-    private readonly ICommentService _commentService;
     private readonly ICategoryService _categoryService;
+    private readonly ICommentService _commentService;
 
     /// <summary>
     ///     Comment controller constructor
@@ -72,7 +72,7 @@ public class CommentController : ControllerBase
             HasPreviousPage = pagedOutput.HasPreviousPage
         };
     }
-    
+
     /// <summary>
     ///     Get topic by keyword
     /// </summary>
@@ -83,9 +83,11 @@ public class CommentController : ControllerBase
     /// <param name="parameter">Pagination parameter</param>
     /// <returns>PaginationResponseDTO <seealso cref="CommentOutput" /></returns>
     [HttpGet("Keyword")]
-    public PaginationResponseDTO<CommentOutput> GetByKeyword([FromQuery] string keyword, [FromQuery] PaginationParameter parameter)
+    public PaginationResponseDTO<CommentOutput> GetByKeyword([FromQuery] string keyword,
+        [FromQuery] PaginationParameter parameter)
     {
-        PaginatedEnumerable<CommentOutput> pagedOutput = _commentService.GetCommentByKeyword(keyword).GetPage(parameter);
+        PaginatedEnumerable<CommentOutput>
+            pagedOutput = _commentService.GetCommentByKeyword(keyword).GetPage(parameter);
         return new PaginationResponseDTO<CommentOutput>
         {
             Data = pagedOutput.Items,
@@ -97,6 +99,20 @@ public class CommentController : ControllerBase
             PageSize = pagedOutput.PageSize,
             HasNextPage = pagedOutput.HasNextPage,
             HasPreviousPage = pagedOutput.HasPreviousPage
+        };
+    }
+
+    /// <summary>
+    ///     Get available keywords
+    /// </summary>
+    /// <param name="keyword">the keyword to filter</param>
+    /// <returns>ResponseDTO <seealso cref="string" /></returns>
+    [HttpGet("Keywords")]
+    public ResponseDTO<ICollection<string>> GetKeywords([FromQuery] string keyword)
+    {
+        return new ResponseDTO<ICollection<string>>
+        {
+            Data = _commentService.GetKeywords(keyword), Success = true, Message = "Get keywords successfully"
         };
     }
 
@@ -131,7 +147,7 @@ public class CommentController : ControllerBase
         {
             return BadRequest(new ResponseDTO<CommentOutput> {Message = "Category not found", ErrorCode = 1});
         }
-        
+
         int userId = int.Parse(User.FindFirst("Id")!.Value);
         CommentOutput? c = _commentService.AddComment(userId, comment);
         return c switch

@@ -50,7 +50,7 @@ public class CommentService : ICommentService
         return _mapper.Map<ICollection<CommentOutput>>(comment);
     }
 
-    public ICollection<CommentOutput> GetCommentByKeyword(string keyword, bool includeChild)
+    public ICollection<CommentOutput> GetCommentByKeyword(string? keyword, bool includeChild)
     {
         IQueryable<Comment> comment = GetComments();
         if (!includeChild)
@@ -68,7 +68,7 @@ public class CommentService : ICommentService
         return _mapper.Map<ICollection<CommentOutput>>(commentList);
     }
 
-    public ICollection<string> GetKeywords(string keyword)
+    public ICollection<string> GetKeywords(string? keyword)
     {
         return GetCommentByKeyword(keyword, false)
             .SelectMany(c => c.Keyword.Split(','))
@@ -182,8 +182,8 @@ public interface ICommentService
     CommentOutput? GetComment(int id);
     ICollection<CommentOutput> GetCommentByCategory(int cateId, bool includeChild = false);
     ICollection<CommentOutput> GetCommentByParent(int parentId);
-    ICollection<CommentOutput> GetCommentByKeyword(string keyword, bool includeChild = false);
-    ICollection<string> GetKeywords(string keyword);
+    ICollection<CommentOutput> GetCommentByKeyword(string? keyword, bool includeChild = false);
+    ICollection<string> GetKeywords(string? keyword);
     CommentOutput? AddComment(int userId, CommentInput commentInput);
     CommentOutput? UpdateComment(int commentId, CommentUpdate commentUpdate, int userId, bool bypassCheck);
     bool DeleteComment(int commentId, int userId, bool bypassCheck);

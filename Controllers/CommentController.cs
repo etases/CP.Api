@@ -83,8 +83,7 @@ public class CommentController : ControllerBase
     /// <param name="parameter">Pagination parameter</param>
     /// <returns>PaginationResponseDTO <seealso cref="CommentOutput" /></returns>
     [HttpGet("Keyword")]
-    public PaginationResponseDTO<CommentOutput> GetByKeyword([FromQuery] string keyword,
-        [FromQuery] PaginationParameter parameter)
+    public PaginationResponseDTO<CommentOutput> GetByKeyword([FromQuery] string? keyword, [FromQuery] PaginationParameter parameter)
     {
         PaginatedEnumerable<CommentOutput>
             pagedOutput = _commentService.GetCommentByKeyword(keyword).GetPage(parameter);
@@ -108,7 +107,7 @@ public class CommentController : ControllerBase
     /// <param name="keyword">the keyword to filter</param>
     /// <returns>ResponseDTO <seealso cref="string" /></returns>
     [HttpGet("Keywords")]
-    public ResponseDTO<ICollection<string>> GetKeywords([FromQuery] string keyword)
+    public ResponseDTO<ICollection<string>> GetKeywords([FromQuery] string? keyword)
     {
         return new ResponseDTO<ICollection<string>>
         {

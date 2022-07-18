@@ -47,46 +47,18 @@ public class CommentController : ControllerBase
     }
 
     /// <summary>
-    ///     Get topic by category id
+    ///     Get filtered topic
     /// </summary>
-    /// <remarks>
-    ///     FIXME: Rename endpoint for better readability
-    /// </remarks>
-    /// <param name="id">Id of the category</param>
-    /// <param name="parameter">Pagination parameter</param>
-    /// <returns>PaginationResponseDTO <seealso cref="CommentOutput" /></returns>
-    [HttpGet("Category/{id}")]
-    public PaginationResponseDTO<CommentOutput> GetByCategory(int id, [FromQuery] PaginationParameter parameter)
-    {
-        PaginatedEnumerable<CommentOutput> pagedOutput = _commentService.GetCommentByCategory(id).GetPage(parameter);
-        return new PaginationResponseDTO<CommentOutput>
-        {
-            Data = pagedOutput.Items,
-            Success = true,
-            Message = "Get comments successfully",
-            TotalRecord = pagedOutput.TotalRecord,
-            TotalPage = pagedOutput.TotalPage,
-            PageNumber = pagedOutput.PageNumber,
-            PageSize = pagedOutput.PageSize,
-            HasNextPage = pagedOutput.HasNextPage,
-            HasPreviousPage = pagedOutput.HasPreviousPage
-        };
-    }
-
-    /// <summary>
-    ///     Get topic by keyword
-    /// </summary>
-    /// <remarks>
-    ///     FIXME: Rename endpoint for better readability
-    /// </remarks>
+    /// <param name="categoryId">The Category Id</param>
     /// <param name="keyword">The Keyword</param>
     /// <param name="parameter">Pagination parameter</param>
     /// <returns>PaginationResponseDTO <seealso cref="CommentOutput" /></returns>
-    [HttpGet("Keyword")]
-    public PaginationResponseDTO<CommentOutput> GetByKeyword([FromQuery] string? keyword, [FromQuery] PaginationParameter parameter)
+    [HttpGet("Filtered")]
+    public PaginationResponseDTO<CommentOutput> GetFilteredTopics([FromQuery] int? categoryId,
+        [FromQuery] string? keyword, [FromQuery] PaginationParameter parameter)
     {
-        PaginatedEnumerable<CommentOutput>
-            pagedOutput = _commentService.GetCommentByKeyword(keyword).GetPage(parameter);
+        PaginatedEnumerable<CommentOutput> pagedOutput =
+            _commentService.GetFilteredComment(categoryId, keyword).GetPage(parameter);
         return new PaginationResponseDTO<CommentOutput>
         {
             Data = pagedOutput.Items,
@@ -104,14 +76,17 @@ public class CommentController : ControllerBase
     /// <summary>
     ///     Get available keywords
     /// </summary>
+    /// <param name="categoryId">the category id</param>
     /// <param name="keyword">the keyword to filter</param>
     /// <returns>ResponseDTO <seealso cref="string" /></returns>
-    [HttpGet("Keywords")]
-    public ResponseDTO<ICollection<string>> GetKeywords([FromQuery] string? keyword)
+    [HttpGet("Keyword")]
+    public ResponseDTO<ICollection<string>> GetKeywords([FromQuery] int? categoryId, [FromQuery] string? keyword)
     {
         return new ResponseDTO<ICollection<string>>
         {
-            Data = _commentService.GetKeywords(keyword), Success = true, Message = "Get keywords successfully"
+            Data = _commentService.GetFilteredKeywords(categoryId, keyword),
+            Success = true,
+            Message = "Get keywords successfully"
         };
     }
 

@@ -33,29 +33,17 @@ public class CommentService : ICommentService
         return output;
     }
 
-    public ICollection<CommentOutput> GetCommentByCategory(int id, bool includeChild)
-    {
-        IQueryable<Comment> comment = GetComments().Where(c => c.CategoryId == id);
-        if (!includeChild)
-        {
-            comment = comment.Where(c => c.ParentId == null);
-        }
-
-        return _mapper.Map<ICollection<CommentOutput>>(comment.ToList());
-    }
-
-    public ICollection<CommentOutput> GetCommentByParent(int id)
-    {
-        List<Comment> comment = GetComments().Where(c => c.ParentId == id).ToList();
-        return _mapper.Map<ICollection<CommentOutput>>(comment);
-    }
-
-    public ICollection<CommentOutput> GetCommentByKeyword(string? keyword, bool includeChild)
+    public ICollection<CommentOutput> GetFilteredComment(int? cateId, string? keyword, bool includeChild)
     {
         IQueryable<Comment> comment = GetComments();
         if (!includeChild)
         {
             comment = comment.Where(c => c.ParentId == null);
+        }
+
+        if (cateId != null)
+        {
+            comment = comment.Where(c => c.CategoryId == cateId);
         }
 
         List<Comment> commentList = comment.ToList();
@@ -68,13 +56,19 @@ public class CommentService : ICommentService
         return _mapper.Map<ICollection<CommentOutput>>(commentList);
     }
 
-    public ICollection<string> GetKeywords(string? keyword)
+    public ICollection<string> GetFilteredKeywords(int? cateId, string? keyword)
     {
-        return GetCommentByKeyword(keyword, false)
+        return GetFilteredComment(cateId, keyword, false)
             .SelectMany(c => c.Keyword.Split(','))
             .Select(c => c.Trim())
             .Distinct()
             .ToList();
+    }
+
+    public ICollection<CommentOutput> GetCommentByParent(int id)
+    {
+        List<Comment> comment = GetComments().Where(c => c.ParentId == id).ToList();
+        return _mapper.Map<ICollection<CommentOutput>>(comment);
     }
 
     public CommentOutput? AddComment(int userId, CommentInput commentInput)
@@ -180,10 +174,9 @@ public class CommentService : ICommentService
 public interface ICommentService
 {
     CommentOutput? GetComment(int id);
-    ICollection<CommentOutput> GetCommentByCategory(int cateId, bool includeChild = false);
+    ICollection<CommentOutput> GetFilteredComment(int? cateId, string? keyword, bool includeChild = false);
+    ICollection<string> GetFilteredKeywords(int? cateId, string? keyword);
     ICollection<CommentOutput> GetCommentByParent(int parentId);
-    ICollection<CommentOutput> GetCommentByKeyword(string? keyword, bool includeChild = false);
-    ICollection<string> GetKeywords(string? keyword);
     CommentOutput? AddComment(int userId, CommentInput commentInput);
     CommentOutput? UpdateComment(int commentId, CommentUpdate commentUpdate, int userId, bool bypassCheck);
     bool DeleteComment(int commentId, int userId, bool bypassCheck);

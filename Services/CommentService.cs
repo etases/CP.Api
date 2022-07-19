@@ -167,7 +167,8 @@ public class CommentService : ICommentService
         return _context.Comments
             .Include(c => c.Account)
             .Include(c => c.Category)
-            .Include(c => c.Children);
+            .Include(c => c.Children)
+            .OrderByDescending(c => c.CreatedDate);
     }
 }
 

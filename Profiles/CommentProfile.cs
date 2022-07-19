@@ -18,7 +18,7 @@ public class CommentProfile : Profile
                     des.Keyword = string.Empty;
                 }
 
-                des.HasChild = src.Children != null && !src.Children.Any();
+                des.HasChild = src.Children != null && src.Children.Any();
             });
         CreateMap<CommentInput, Comment>();
         CreateMap<CommentUpdate, Comment>();

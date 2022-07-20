@@ -1,4 +1,5 @@
 using CP.Api.DTOs;
+using CP.Api.DTOs.Comment;
 using CP.Api.DTOs.Response;
 using CP.Api.Models;
 using CP.Api.Services;
@@ -16,14 +17,17 @@ namespace CP.Api.Controllers;
 public class CategoryController : ControllerBase
 {
     private readonly ICategoryService _categoryService;
+    private readonly ICommentService _commentService;
 
     /// <summary>
     ///     Category controller constructor
     /// </summary>
     /// <param name="categoryService">Category service</param>
-    public CategoryController(ICategoryService categoryService)
+    /// <param name="commentService">Comment service</param>
+    public CategoryController(ICategoryService categoryService, ICommentService commentService)
     {
         _categoryService = categoryService;
+        _commentService = commentService;
     }
 
     /// <summary>
@@ -64,11 +68,18 @@ public class CategoryController : ControllerBase
     [Authorize(Roles = DefaultRoles.AdministratorString)]
     public ActionResult<ResponseDTO<CategoryOutput>> CreateCategory(CategoryInput categoryInput)
     {
+        int userId = int.Parse(User.FindFirst("Id")!.Value);
         CategoryOutput? category = _categoryService.CreateCategory(categoryInput);
-        return category switch
+        if (category == null)
         {
-            null => Conflict(new ResponseDTO<CategoryOutput> {Message = "Category existed", Success = false}),
-            _ => Ok(new ResponseDTO<CategoryOutput> {Data = category, Success = true, Message = "Category created"})
-        };
+            return Conflict(new ResponseDTO<CategoryOutput> {Message = "Category existed", Success = false});
+        }
+
+        _commentService.AddComment(userId, new CommentInput
+        {
+            Content = "Created category " + category.Name,
+            CategoryId = category.Id,
+        });
+        return Ok(new ResponseDTO<CategoryOutput> {Data = category, Success = true, Message = "Category created"});
     }
 }

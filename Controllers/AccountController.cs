@@ -65,6 +65,24 @@ public class AccountController : ControllerBase
     }
 
     /// <summary>
+    ///     Get all accounts
+    /// </summary>
+    /// <param name="checkBanned">except banned accounts</param>
+    /// <param name="checkDisabled">except disable accounts</param>
+    /// <returns>ResponseDTO <seealso cref="AccountOutput" /></returns>
+    [HttpGet("All")]
+    [Authorize(Roles = DefaultRoles.AdministratorString)]
+    public ResponseDTO<ICollection<AccountOutput>> GetAll(bool checkBanned = false, bool checkDisabled = false)
+    {
+        return new ResponseDTO<ICollection<AccountOutput>>
+        {
+            Data = _accountService.GetAllAccounts(checkBanned, checkDisabled),
+            Success = true,
+            Message = "Get all accounts"
+        };
+    }
+
+    /// <summary>
     ///     Register new account
     /// </summary>
     /// <param name="registerInput">Information to register new account</param>
@@ -162,15 +180,21 @@ public class AccountController : ControllerBase
     /// <param name="id">Id of the account</param>
     /// <param name="disable">Visibility status</param>
     /// <returns>ResponseDTO</returns>
-    [Authorize(Roles = DefaultRoles.AdministratorString)]
+    [Authorize]
     [HttpPut("Disable/{id}")]
     public ActionResult<ResponseDTO> DisableAccount(int id, bool disable)
     {
+        int userId = int.Parse(User.FindFirst("Id")!.Value);
+        bool isAdminRole = User.IsInRole(DefaultRoles.AdministratorString);
+        if (userId != id && !isAdminRole)
+        {
+            return Unauthorized(new ResponseDTO {ErrorCode = 2, Message = "You are not allowed to do this"});
+        }
         bool success = _accountService.SetDisableStatus(id, disable);
         return success switch
         {
             true => Ok(new ResponseDTO {Success = true, Message = "Visibility status updated"}),
-            _ => NotFound(new ResponseDTO {Success = false, Message = "Account not found"})
+            _ => NotFound(new ResponseDTO {ErrorCode = 1, Message = "Account not found"})
         };
     }
 }

@@ -56,6 +56,11 @@ public class AccountService : IAccountService
         return (false, output);
     }
 
+    public ICollection<AccountOutput> GetAllAccounts(bool checkBanned, bool checkDisabled)
+    { 
+        return _mapper.Map<ICollection<AccountOutput>>(GetAccounts(checkBanned, checkDisabled));
+    }
+
     public AccountOutput? UpdateProfile(int id, UpdateProfileInput input)
     {
         Account? account = GetAccounts(true, true).SingleOrDefault(a => a.Id == id);
@@ -130,6 +135,7 @@ public interface IAccountService
 {
     (bool found, AccountOutput? output) Login(LoginInput input);
     (bool existed, AccountOutput? output) Register(RegisterInput input);
+    ICollection<AccountOutput> GetAllAccounts(bool checkBanned, bool checkDisabled);
     AccountOutput? UpdateProfile(int id, UpdateProfileInput input);
     bool SetDisableStatus(int id, bool disable);
     bool SetBanStatus(int id, bool ban);

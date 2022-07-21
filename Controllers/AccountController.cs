@@ -6,6 +6,7 @@ using System.Text;
 using CP.Api.Core.Models;
 using CP.Api.DTOs.Account;
 using CP.Api.DTOs.Response;
+using CP.Api.Extensions;
 using CP.Api.Models;
 using CP.Api.Services;
 
@@ -67,18 +68,26 @@ public class AccountController : ControllerBase
     /// <summary>
     ///     Get all accounts
     /// </summary>
+    /// <param name="parameter">pagination parameter</param>
     /// <param name="checkBanned">except banned accounts</param>
     /// <param name="checkDisabled">except disable accounts</param>
     /// <returns>ResponseDTO <seealso cref="AccountOutput" /></returns>
     [HttpGet("All")]
     [Authorize(Roles = DefaultRoles.AdministratorString)]
-    public ResponseDTO<ICollection<AccountOutput>> GetAll(bool checkBanned = false, bool checkDisabled = false)
+    public PaginationResponseDTO<AccountOutput> GetAll([FromQuery] PaginationParameter parameter, [FromQuery]  bool checkBanned = false, [FromQuery]  bool checkDisabled = false)
     {
-        return new ResponseDTO<ICollection<AccountOutput>>
+        PaginatedEnumerable<AccountOutput> pagedOutput = _accountService.GetAllAccounts(checkBanned, checkDisabled).GetPage(parameter);
+        return new PaginationResponseDTO<AccountOutput>
         {
-            Data = _accountService.GetAllAccounts(checkBanned, checkDisabled),
+            Data = pagedOutput.Items,
             Success = true,
-            Message = "Get all accounts"
+            Message = "Get comments successfully",
+            TotalRecord = pagedOutput.TotalRecord,
+            TotalPage = pagedOutput.TotalPage,
+            PageNumber = pagedOutput.PageNumber,
+            PageSize = pagedOutput.PageSize,
+            HasNextPage = pagedOutput.HasNextPage,
+            HasPreviousPage = pagedOutput.HasPreviousPage
         };
     }
 

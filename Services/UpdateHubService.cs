@@ -12,19 +12,19 @@ public class UpdateHubService : IUpdateHubService
     public void NotifyCategoryUpdate(int categoryId)
     {
         _updateClient.PostAsJsonAsync("",
-            new {MethodName = "updateCategory", Message = "Update Category", Data = categoryId});
+            new {MethodName = "updateCategory", Message = "Update Category", Data = categoryId.ToString()});
     }
 
     public void NotifyCommentUpdate(int commentId)
     {
         _updateClient.PostAsJsonAsync("",
-            new {MethodName = "updateComment", Message = "Update Comment", Data = commentId});
+            new {MethodName = "updateComment", Message = "Update Comment", Data = commentId.ToString()});
     }
 
     public void NotifyVoteCountUpdate(int commentId)
     {
         _updateClient.PostAsJsonAsync("",
-            new {MethodName = "updateVote", Message = "Update Vote Of Comment", Data = commentId});
+            new {MethodName = "updateVote", Message = "Update Vote Of Comment", Data = commentId.ToString()});
     }
 }
 
